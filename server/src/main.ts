@@ -1,12 +1,19 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import * as path from 'node:path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors();
+
+  const uploadDir = app.get(ConfigService).get<string>('LOCAL_UPLOAD_DIR') ?? './uploads';
+  const uploadRoot = path.isAbsolute(uploadDir) ? uploadDir : path.resolve(process.cwd(), uploadDir);
+  app.useStaticAssets(uploadRoot, { index: false, fallthrough: true });
 
   app.useGlobalPipes(
     new ValidationPipe({
