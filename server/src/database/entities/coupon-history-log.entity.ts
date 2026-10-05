@@ -9,9 +9,11 @@ import { decimalTransformer } from './decimal.transformer';
 @Entity()
 export class CouponHistoryLog extends BaseEntity {
   @Column({ type: 'int' })
+  @Index()
   couponId: number;
 
   @Column({ type: 'int' })
+  @Index()
   userId: number;
 
   @Column({ type: 'int', nullable: true })
