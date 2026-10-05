@@ -1,6 +1,7 @@
 import { User } from './user.entity';
 import { AdminUser } from './admin-user.entity';
 import { AuthProvider } from './auth-provider.entity';
+import { AuthToken } from './auth-token.entity';
 import { Address } from './address.entity';
 import { Category } from './category.entity';
 import { Country } from './country.entity';
@@ -39,6 +40,7 @@ export { decimalTransformer } from './decimal.transformer';
 export { User } from './user.entity';
 export { AdminUser } from './admin-user.entity';
 export { AuthProvider } from './auth-provider.entity';
+export { AuthToken } from './auth-token.entity';
 export { Address } from './address.entity';
 export { Category } from './category.entity';
 export { Country } from './country.entity';
@@ -77,6 +79,7 @@ export const ENTITIES = [
   User,
   AdminUser,
   AuthProvider,
+  AuthToken,
   Address,
   Category,
   Country,

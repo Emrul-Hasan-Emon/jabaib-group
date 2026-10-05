@@ -5,6 +5,7 @@ import {
   User,
   AdminUser,
   AuthProvider,
+  AuthToken,
   Address,
   Category,
   Country,
@@ -49,6 +50,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   user: Repository<User>;
   adminUser: Repository<AdminUser>;
   authProvider: Repository<AuthProvider>;
+  authToken: Repository<AuthToken>;
   address: Repository<Address>;
   category: Repository<Category>;
   country: Repository<Country>;
@@ -89,6 +91,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     private readonly adminUserRepository: Repository<AdminUser>,
     @InjectRepository(AuthProvider)
     private readonly authProviderRepository: Repository<AuthProvider>,
+    @InjectRepository(AuthToken)
+    private readonly authTokenRepository: Repository<AuthToken>,
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
     @InjectRepository(Category)
@@ -159,6 +163,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.user = this.userRepository;
     this.adminUser = this.adminUserRepository;
     this.authProvider = this.authProviderRepository;
+    this.authToken = this.authTokenRepository;
     this.address = this.addressRepository;
     this.category = this.categoryRepository;
     this.country = this.countryRepository;
