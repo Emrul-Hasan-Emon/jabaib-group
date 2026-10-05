@@ -8,7 +8,6 @@ import { ProductLabel } from './product-label.entity';
 @Entity()
 export class Product extends BaseEntity {
   @Column()
-  @Index()
   name: string;
 
   @Column({ type: 'varchar', length: 250, nullable: true })
