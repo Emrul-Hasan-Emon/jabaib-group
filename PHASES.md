@@ -49,7 +49,7 @@
 | 7 | ValidationPipe (class-validator) + DTO conventions | ✅ Completed |
 | 8 | Request logging interceptor + tracker fields population (createdBy/updaterName) | ⬜ Not Started |
 | 9 | File upload module (FileModule + FileHandleService, local disk storage, upload/delete endpoints) | ✅ Completed |
-| 10 | Pagination/sorting/filtering helper (shared list-query DTO) | ⬜ Not Started |
+| 10 | Pagination helper: page-size + cursor params and result shapers | ✅ Completed |
 | 11 | Health check endpoint (`GET /` public) | ✅ Completed |
 
 ## Phase 2 — Admin Panel: Web Scaffold & Auth
