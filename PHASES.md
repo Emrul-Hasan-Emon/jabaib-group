@@ -48,7 +48,7 @@
 | 6 | Global exception filter + standard error shape | ✅ Completed |
 | 7 | ValidationPipe (class-validator) + DTO conventions | ✅ Completed |
 | 8 | Request logging interceptor + tracker fields population (createdBy/updaterName) | ⬜ Not Started |
-| 9 | File upload module (multer/storage → local or S3); store url+path pairs | ⬜ Not Started |
+| 9 | File upload module (FileModule + FileHandleService, local disk storage, upload/delete endpoints) | ✅ Completed |
 | 10 | Pagination/sorting/filtering helper (shared list-query DTO) | ⬜ Not Started |
 | 11 | Health check endpoint (`GET /` public) | ✅ Completed |
 
