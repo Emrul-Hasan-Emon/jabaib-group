@@ -1,0 +1,32 @@
+# Dependencies (any nested level)
+**/node_modules/
+
+# Build output
+**/dist/
+**/.next/
+**/out/
+**/build/
+
+# Environment files (keep .env.example tracked)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Logs
+**/*.log
+**/npm-debug.log*
+
+# Coverage & caches
+**/coverage/
+**/.eslintcache
+**/*.tsbuildinfo
+
+# OS / editor
+.DS_Store
+**/.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local uploads
+**/uploads/
