@@ -3,11 +3,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { DatabaseService } from '../database/database.service';
-import { AdminUser } from '../database/entities/admin-user.entity';
-import { User } from '../database/entities/user.entity';
-import { JwtManagerService } from './jwt/jwt-manager.service';
-import { JwtPayload } from './jwt/jwt-payload';
+import { DatabaseService } from '../../database/database.service';
+import { AdminUser } from '../../database/entities/admin-user.entity';
+import { User } from '../../database/entities/user.entity';
+import { JwtManagerService } from '../jwt/jwt-manager.service';
+import { JwtPayload } from '../jwt/jwt-payload';
 
 export interface LoginDetails {
   userAgent?: string;

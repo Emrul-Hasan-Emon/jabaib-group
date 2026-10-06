@@ -17,7 +17,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { FileHandleService } from './file-handle.service';
+import { FileHandleService } from '../services/file-handle.service';
 
 /** Allowed upload folders — keep storage tidy per entity. */
 const FOLDERS = [
@@ -33,7 +33,7 @@ const FOLDERS = [
 
 @ApiTags('File')
 @ApiBearerAuth('JWT-auth')
-@Controller('file')
+@Controller({ path: 'file', version: '1' })
 export class FileController {
   constructor(private readonly fileHandle: FileHandleService) {}
 
