@@ -1,4 +1,7 @@
-import { ValidationPipe } from '@nestjs/common';
+import {
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -10,6 +13,8 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors();
+
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
   const uploadDir = app.get(ConfigService).get<string>('LOCAL_UPLOAD_DIR') ?? './uploads';
   const uploadRoot = path.isAbsolute(uploadDir) ? uploadDir : path.resolve(process.cwd(), uploadDir);

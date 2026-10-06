@@ -56,24 +56,24 @@
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Scaffold Next.js app in `web/` (App Router, TS, Tailwind, core UI lib) | ⬜ Not Started |
-| 2 | Admin route group layout: sidebar nav, topbar, breadcrumbs, responsive | ⬜ Not Started |
-| 3 | API client (fetch wrapper with token refresh, error handling) | ⬜ Not Started |
-| 4 | Admin login page + auth context/guard (role check) | ⬜ Not Started |
-| 5 | Dashboard landing page (stats placeholders wired to real counts later) | ⬜ Not Started |
-| 6 | Language toggle pattern (en/bn) for admin-entered content forms | ⬜ Not Started |
+| 1 | Scaffold Next.js app in `web/` (App Router, TS, Tailwind) | ✅ Completed |
+| 2 | Admin route group layout: sidebar nav, topbar, Language toggle, guard, responsive | ✅ Completed |
+| 3 | API client (fetch wrapper with token refresh, error handling) | ✅ Completed |
+| 4 | Admin login page + auth context/guard (role check) | ✅ Completed |
+| 5 | Dashboard landing page (stats placeholders wired to real counts later) | ✅ Completed |
+| 6 | Language toggle pattern (en/bn) for admin-entered content forms | ✅ Completed |
 
 ## Phase 3 — Admin: Catalog Management
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Categories CRUD (tree by parentId, image upload url+path, nameBN/descriptionBN, isActive, sortOrder) | ⬜ Not Started |
-| 2 | Attributes CRUD (name, nameBN) + AttributeValues CRUD (name, nameBN, colorCode, sortOrder) | ⬜ Not Started |
-| 3 | Products list: search, filter (category, label, isPublished, isFeatured), pagination, sort, bulk activate/deactivate | ⬜ Not Started |
-| 4 | Product create/edit form: name/nameBN, description/descriptionBN, slug, category, seoTitle/seoDescription (+BN), thumbnail upload, label, flags | ⬜ Not Started |
-| 5 | Product media manager: upload multiple images/videos (url+path), altText/altTextBN, sortOrder, primary flag | ⬜ Not Started |
-| 6 | SKU manager: per-product SKUs (sku code, price, salePrice, stock, description/descriptionBN, image url+path), variant selection via ProductSKUVariant | ⬜ Not Started |
-| 7 | ProductLabels CRUD (name, nameBN, colorCode, isActive) | ⬜ Not Started |
+| 1 | Categories CRUD (tree by parentId, image upload url+path, nameBN/descriptionBN, isActive, sortOrder) | ✅ Completed |
+| 2 | Attributes CRUD (name, nameBN) + AttributeValues CRUD (name, nameBN, colorCode, sortOrder) | ✅ Completed |
+| 3 | Products list: search, filter (category, label, isPublished, isFeatured), pagination, sort, bulk activate/deactivate | ✅ Completed |
+| 4 | Product create/edit form: name/nameBN, description/descriptionBN, slug, category, seoTitle/seoDescription (+BN), thumbnail upload, label, flags | ✅ Completed |
+| 5 | Product media manager: upload multiple images/videos (url+path), altText/altTextBN, sortOrder, primary flag | ✅ Completed |
+| 6 | SKU manager: per-product SKUs (sku code, price, salePrice, stock, description/descriptionBN, image url+path), variant selection via ProductSKUVariant | ✅ Completed |
+| 7 | ProductLabels CRUD (name, nameBN, colorCode, isActive) | ✅ Completed |
 | 8 | Wishlist/Review moderation list (hide/delete review, view reviewer + product) | ⬜ Not Started |
 
 ## Phase 4 — Admin: Orders, Payments & Returns

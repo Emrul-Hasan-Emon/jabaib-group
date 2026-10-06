@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
+import { CatalogModule } from './catalog/catalog.module';
 import { JwtManagerModule } from './auth/jwt/jwt-manager.module';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -22,6 +23,7 @@ import { DatabaseExceptionFilter } from './auth/filters/database-exception.filte
     JwtManagerModule,
     AuthModule,
     FileModule,
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [
