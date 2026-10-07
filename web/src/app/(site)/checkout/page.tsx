@@ -194,7 +194,7 @@ function CheckoutForm() {
 
   if (!authed) {
     return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
+      <div className="mx-auto max-w-md px-4 py-14 text-center sm:py-20">
         <h1 className="text-xl font-extrabold text-foreground">
           {t('Sign in to check out')}
         </h1>
@@ -212,7 +212,7 @@ function CheckoutForm() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-3 sm:py-8">
       <h1 className="text-2xl font-extrabold text-foreground sm:text-3xl">
         {t('Checkout')}
       </h1>
@@ -221,7 +221,7 @@ function CheckoutForm() {
       </p>
 
       {lines.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-border bg-card px-6 py-16 text-center">
+        <div className="mt-6 rounded-xl border border-border bg-card px-6 py-10 text-center sm:mt-8 sm:py-16">
           <p className="font-semibold text-foreground">{t('Your bag is empty')}</p>
           <Link href="/shop" className="mt-4 inline-block rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
             {t('Start shopping')}
@@ -230,7 +230,7 @@ function CheckoutForm() {
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
           {/* steps */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* address */}
             <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
               <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
@@ -261,11 +261,11 @@ function CheckoutForm() {
               )}
 
               {addressMode === 'saved' && addresses.length > 0 ? (
-                <div className="mt-3 space-y-2">
+                <div className="mt-2 space-y-1.5 sm:mt-3 sm:space-y-2">
                   {addresses.map((a) => (
                     <label
                       key={a.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${
+                      className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition sm:gap-3 sm:p-3 ${
                         addressId === a.id
                           ? 'border-primary bg-primary/5'
                           : 'border-border'
@@ -295,7 +295,7 @@ function CheckoutForm() {
                   ))}
                 </div>
               ) : (
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="mt-2 grid gap-2.5 sm:mt-3 sm:gap-3 sm:grid-cols-2">
                   <Field
                     label={t('Full name')}
                     value={inline.recipientName}
@@ -420,7 +420,7 @@ function CheckoutForm() {
               {t('Order summary')} ({preview?.totals.itemCount ?? 0})
             </h2>
 
-            <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
+            <ul className="mt-2 max-h-72 space-y-1.5 overflow-y-auto pr-1 sm:mt-3 sm:max-h-64 sm:space-y-2">
               {lines.map((line) => (
                 <li key={line.key} className="flex items-center gap-3 text-sm">
                   <span className="h-10 w-8 shrink-0 overflow-hidden rounded bg-muted">
@@ -493,7 +493,7 @@ function CheckoutForm() {
             </div>
 
             {/* totals */}
-            <div className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
+            <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-[13px] sm:mt-4 sm:pt-4 sm:text-sm">
               <Row
                 label={t('Subtotal')}
                 value={formatTaka(preview?.totals.listTotal ?? 0)}
@@ -548,7 +548,7 @@ function CheckoutForm() {
               disabled={
                 placing || !preview || !payloadReady || (paymentMethod !== 'cod' && !transactionId.trim())
               }
-              className="mt-4 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-3.5 w-full rounded-full bg-primary py-2.5 text-[13px] font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:mt-4 sm:py-3 sm:text-sm"
             >
               {placing ? t('Placing order…') : t('Place order')}
             </button>

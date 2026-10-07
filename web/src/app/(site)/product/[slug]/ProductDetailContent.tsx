@@ -17,7 +17,8 @@ import { ProductGridSkeleton } from '@/components/storefront/SectionHeader';
 interface OptionGroup {
   attributeId: number;
   attributeName: string;
-  values: { valueId: number; value: string }[];
+  values: { valueId: number; value: string; valueBN?: string | null }[];
+  attributeNameBN?: string | null;
 }
 
 /** Effective price for one SKU, mirroring the backend discount-window logic. */
@@ -84,9 +85,18 @@ export function ProductDetailContent({ slug }: { slug: string }) {
     const map = new Map<number, OptionGroup>();
     for (const sku of product?.skus ?? []) {
       for (const v of sku.skuVariants ?? []) {
-        const g = map.get(v.attribute.id) ?? { attributeId: v.attribute.id, attributeName: v.attribute.name, values: [] };
+        const g = map.get(v.attribute.id) ?? {
+          attributeId: v.attribute.id,
+          attributeName: v.attribute.name,
+          attributeNameBN: v.attribute.nameBN,
+          values: [],
+        };
         if (!g.values.some((x) => x.valueId === v.attributeValue.id)) {
-          g.values.push({ valueId: v.attributeValue.id, value: v.attributeValue.value });
+          g.values.push({
+            valueId: v.attributeValue.id,
+            value: v.attributeValue.name,
+            valueBN: v.attributeValue.nameBN,
+          });
         }
         map.set(v.attribute.id, g);
       }
@@ -161,7 +171,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
       image: product.thumbnailUrl ?? images[0]?.url ?? null,
       skuId: selectedSku?.id ?? null,
       skuLabel: selectedSku
-        ? (selectedSku.skuVariants ?? []).map((v) => v.attributeValue.value).join(' / ')
+        ? (selectedSku.skuVariants ?? []).map((v) => v.attributeValue.name).join(' / ')
         : '',
       unitPrice: price,
       qty,
@@ -171,7 +181,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-28 pt-5 sm:py-8 md:pb-12">
       {/* breadcrumb */}
-      <nav className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
+      <nav className="mb-3 flex items-center gap-1 text-[11px] text-muted-foreground sm:mb-4 sm:text-xs">
         <Link href="/" className="hover:text-primary">{t('Home')}</Link>
         <ChevronRight size={12} />
         <Link href="/shop" className="hover:text-primary">{t('Shop')}</Link>
@@ -185,7 +195,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
         )}
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-8">
         {/* gallery */}
         <div>
           <ProductGallery
@@ -223,11 +233,11 @@ export function ProductDetailContent({ slug }: { slug: string }) {
             )}
           </div>
 
-          <h1 className="mt-2 text-2xl font-extrabold leading-tight text-foreground sm:text-3xl">
+          <h1 className="mt-1.5 text-xl font-extrabold leading-tight text-foreground sm:mt-2 sm:text-3xl">
             {t(product.name, product.nameBN)}
           </h1>
 
-          <div className="mt-4 flex flex-wrap items-baseline gap-3">
+          <div className="mt-2.5 flex flex-wrap items-baseline gap-3 sm:mt-4">
             <span className="text-3xl font-extrabold text-primary">{formatTaka(price)}</span>
             {onSale && original != null && (
               <>
@@ -253,14 +263,18 @@ export function ProductDetailContent({ slug }: { slug: string }) {
 
           {/* variant picker */}
           {optionGroups.length > 0 && (
-            <div className="mt-6 space-y-5">
+            <div className="mt-4 space-y-4 sm:mt-6 sm:space-y-5">
               {optionGroups.map((group) => (
                 <div key={group.attributeId}>
                   <p className="mb-2 text-sm font-semibold text-foreground">
-                    {group.attributeName}
+                    {locale === 'bn' && group.attributeNameBN ? group.attributeNameBN : group.attributeName}
                     {selection[group.attributeId] != null && (
                       <span className="ml-2 font-normal text-muted-foreground">
-                        {group.values.find((v) => v.valueId === selection[group.attributeId])?.value}
+                        {(() => {
+                          const picked = group.values.find((v) => v.valueId === selection[group.attributeId]);
+                          if (!picked) return null;
+                          return locale === 'bn' && picked.valueBN ? picked.valueBN : picked.value;
+                        })()}
                       </span>
                     )}
                   </p>
@@ -288,7 +302,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
                                 : 'cursor-not-allowed border-border bg-muted text-muted-foreground line-through'
                           }`}
                         >
-                          {locale === 'bn' && /[\u0980-\u09FF]/.test(v.value) ? v.value : v.value}
+                          {locale === 'bn' && v.valueBN ? v.valueBN : v.value}
                         </button>
                       );
                     })}
@@ -299,7 +313,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
           )}
 
           {/* qty + add to bag */}
-          <div className="mt-7 flex gap-3">
+          <div className="mt-5 flex gap-2.5 sm:mt-7 sm:gap-3">
             <div className="flex h-12 items-center rounded-full border border-border bg-card">
               <button
                 onClick={() => setQty((n) => Math.max(1, n - 1))}
@@ -342,7 +356,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
           </div>
 
           {/* service notes */}
-          <div className="mt-6 grid grid-cols-3 gap-2 rounded-xl border border-border bg-card p-4 text-center text-[11px] text-muted-foreground">
+          <div className="mt-4 grid grid-cols-3 gap-1.5 rounded-xl border border-border bg-card p-2.5 text-center text-[10px] text-muted-foreground sm:mt-6 sm:gap-2 sm:p-4 sm:text-[11px]">
             <div className="flex flex-col items-center gap-1">
               <Truck size={16} className="text-primary" />
               {t('Fast delivery')}

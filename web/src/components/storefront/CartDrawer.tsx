@@ -49,8 +49,8 @@ export function CartDrawer() {
         role="dialog"
         aria-label={t('Shopping cart')}
       >
-        <header className="flex h-14 items-center justify-between border-b border-border px-4">
-          <h2 className="flex items-center gap-2 text-base font-bold text-foreground">
+        <header className="flex h-12 items-center justify-between border-b border-border px-4">
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-foreground">
             <ShoppingBag size={18} className="text-primary" />
             {t('Your bag')}
             {count > 0 && (
@@ -68,7 +68,7 @@ export function CartDrawer() {
           </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="flex-1 overflow-y-auto px-3 py-2.5 sm:px-4 sm:py-4">
           {error && (
             <div className="mb-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               <AlertCircle size={14} className="mt-px shrink-0" />
@@ -80,8 +80,8 @@ export function CartDrawer() {
           )}
 
           {lines.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-3xl">
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-2xl">
                 🛍️
               </div>
               <p className="font-medium text-foreground">
@@ -103,12 +103,12 @@ export function CartDrawer() {
               {lines.map((line) => (
                 <li
                   key={line.key}
-                  className="flex gap-3 rounded-lg border border-border p-2"
+                  className="flex gap-2.5 rounded-lg border border-border p-1.5 sm:gap-3 sm:p-2"
                 >
                   <Link
                     href={`/product/${line.slug}`}
                     onClick={closeDrawer}
-                    className="block h-20 w-16 shrink-0 overflow-hidden rounded-md bg-muted"
+                    className="block h-[68px] w-14 shrink-0 overflow-hidden rounded-md bg-muted sm:h-20 sm:w-16"
                   >
                     {line.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -175,7 +175,7 @@ export function CartDrawer() {
         </div>
 
         {lines.length > 0 && (
-          <footer className="border-t border-border px-4 py-4">
+          <footer className="border-t border-border px-4 py-3">
             {savings > 0 && (
               <div className="mb-1.5 flex items-center justify-between text-xs text-badge-red-foreground">
                 <span>{t('You save')}</span>
@@ -194,7 +194,7 @@ export function CartDrawer() {
               <Link
                 href={authed ? '/checkout' : '/user/login?next=/checkout'}
                 onClick={closeDrawer}
-                className="block w-full rounded-full bg-primary py-3 text-center text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                className="block w-full rounded-full bg-primary py-2.5 text-center text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 sm:py-3 sm:text-sm"
               >
                 {authed ? t('Proceed to checkout') : t('Sign in to checkout')}
               </Link>
