@@ -24,13 +24,13 @@ export function ProductShelf({
   const { t } = useLocale();
   if (!products.length) return null;
   return (
-    <section className="mx-auto max-w-6xl px-4 py-4 sm:py-8">
+    <section className="mx-auto max-w-6xl px-4 py-3 sm:py-8">
       <SectionHeader title={title} titleBN={titleBN} viewAllHref={viewAllHref} />
-      <div className="no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1.5 sm:mx-0 sm:px-0">
+      <div className="no-scrollbar -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1.5 sm:mx-0 sm:gap-2.5 sm:px-0">
         {products.map((p) => (
           <div
             key={p.id}
-            className="w-[42vw] shrink-0 snap-start sm:w-56 lg:w-60"
+            className="w-[31vw] shrink-0 snap-start min-w-[112px] sm:w-56 sm:min-w-0 lg:w-60"
           >
             <ProductCard product={p} />
           </div>

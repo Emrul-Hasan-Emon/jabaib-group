@@ -18,14 +18,14 @@ export function CategoryRail({
   const { t } = useLocale();
   if (!categories.length) return null;
   return (
-    <div className="no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1.5 sm:mx-0 sm:px-0">
+    <div className="no-scrollbar -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1.5 sm:mx-0 sm:gap-2.5 sm:px-0">
       {categories.map((c) => {
         const image = mediaUrl(c.imageUrl);
         return (
           <Link
             key={c.id}
             href={`/shop?categoryId=${c.id}`}
-            className="group flex w-[74px] shrink-0 snap-start flex-col items-center gap-1.5 text-center sm:w-20"
+            className="group flex w-[62px] shrink-0 snap-start flex-col items-center gap-1 text-center sm:w-20 sm:gap-1.5"
           >
             <span className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-full border border-border bg-accent text-lg font-extrabold text-accent-foreground transition-transform group-hover:scale-105">
               {image ? (
@@ -39,7 +39,7 @@ export function CategoryRail({
                 c.name.charAt(0)
               )}
             </span>
-            <span className="line-clamp-1 w-full text-[11px] font-medium leading-tight text-foreground sm:text-xs">
+            <span className="line-clamp-1 w-full text-[10px] font-medium leading-tight text-foreground sm:text-xs">
               {t(c.name, c.nameBN)}
             </span>
           </Link>
