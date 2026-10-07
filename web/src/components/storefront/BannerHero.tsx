@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from '@/lib/locale';
 import { mediaUrl } from '@/lib/media-url';
@@ -12,7 +13,6 @@ import { ArrowRight } from 'lucide-react';
  * dedicated mobileImageUrl when set; swipeable with snap scroll + dots.
  */
 export function BannerHero({ banners }: { banners: Banner[] }) {
-  const { t } = useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
 
@@ -38,8 +38,8 @@ export function BannerHero({ banners }: { banners: Banner[] }) {
         ref={trackRef}
         className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth"
       >
-        {banners.map((b) => (
-          <BannerSlide key={b.id} banner={b} />
+        {banners.map((b, i) => (
+          <BannerSlide key={b.id} banner={b} priority={i === 0} />
         ))}
       </div>
       {banners.length > 1 && (
@@ -60,7 +60,13 @@ export function BannerHero({ banners }: { banners: Banner[] }) {
   );
 }
 
-function BannerSlide({ banner }: { banner: Banner }) {
+function BannerSlide({
+  banner,
+  priority,
+}: {
+  banner: Banner;
+  priority: boolean;
+}) {
   const { t } = useLocale();
   const desktop = mediaUrl(banner.imageUrl);
   const mobile = mediaUrl(banner.mobileImageUrl ?? banner.imageUrl);
@@ -68,31 +74,35 @@ function BannerSlide({ banner }: { banner: Banner }) {
   const href = normalizeLink(banner.linkUrl);
 
   const inner = (
-    <div className="relative h-[420px] w-full overflow-hidden sm:h-[480px]">
+    <div className="relative h-[196px] w-full overflow-hidden sm:h-[480px]">
       {/* mobile-first image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={mobile}
         alt={title}
-        className="absolute inset-0 h-full w-full object-cover sm:hidden"
+        fill
+        priority={priority}
+        sizes="100vw"
+        className="object-cover sm:hidden"
       />
       {/* desktop image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={desktop}
         alt={title}
-        className="absolute inset-0 hidden h-full w-full object-cover sm:block"
+        fill
+        priority={priority}
+        sizes="100vw"
+        className="hidden object-cover sm:block"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-6 sm:max-w-xl sm:p-10">
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
+      <div className="absolute inset-x-0 bottom-0 p-4 sm:max-w-xl sm:p-10">
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 sm:mb-2 sm:text-[11px]">
           Jabaib
         </p>
-        <h2 className="text-3xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-4xl">
+        <h2 className="text-xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-4xl">
           {title}
         </h2>
         {href && (
-          <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-accent">
+          <span className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-primary transition hover:bg-accent sm:mt-4 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm">
             {t('Shop now')} <ArrowRight size={15} />
           </span>
         )}
