@@ -82,7 +82,7 @@ export default function MyReviewsPage() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-xl font-extrabold text-foreground">My Reviews</h1>
+        <h1 className="text-xl font-extrabold text-foreground">{t('My Reviews', 'আমার রিভিউ')}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {items.length > 0
             ? `${items.length} review${items.length === 1 ? '' : 's'} · ${pending} pending approval`
@@ -110,11 +110,11 @@ export default function MyReviewsPage() {
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-10 text-center sm:py-16">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
             <MessageSquare size={24} />
           </span>
-          <p className="font-semibold text-foreground">No reviews yet</p>
+          <p className="font-semibold text-foreground">{t('No reviews yet', 'এখনো কোনো রিভিউ নেই')}</p>
           <p className="text-sm text-muted-foreground">
             Visit a product page and share what you think about it.
           </p>

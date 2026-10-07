@@ -80,14 +80,14 @@ export default function WishlistPage() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-xl font-extrabold text-foreground">My Wishlist</h1>
+        <h1 className="text-xl font-extrabold text-foreground">{t('My Wishlist', 'আমার পছন্দের তালিকা')}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {items.length > 0 ? `${items.length} ${t('saved item', 'সংরক্ষিত আইটেম')}` : 'Save products to shop them later.'}
         </p>
       </div>
 
       {effectiveLoading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-3 sm:gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="animate-pulse rounded-xl border border-border bg-white p-3">
               <div className="aspect-square w-full rounded-lg bg-muted" />
@@ -104,11 +104,11 @@ export default function WishlistPage() {
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-10 text-center sm:py-16">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Heart size={24} />
           </span>
-          <p className="font-semibold text-foreground">Your wishlist is empty</p>
+          <p className="font-semibold text-foreground">{t('Your wishlist is empty', 'আপনার পছন্দের তালিকা খালি')}</p>
           <p className="text-sm text-muted-foreground">
             Tap the heart on any product to save it here.
           </p>
@@ -117,7 +117,7 @@ export default function WishlistPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
           {items.map((row) => {
             const image = mediaUrl(row.product.thumbnailUrl);
             return (
@@ -147,7 +147,7 @@ export default function WishlistPage() {
                   <button
                     onClick={() => moveToCart(row)}
                     disabled={busyId === row.id}
-                    className="mt-2.5 flex items-center justify-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-primary-foreground disabled:opacity-60"
+                    className="mt-2 flex items-center justify-center gap-1 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-[11px] font-bold text-primary transition hover:bg-primary hover:text-primary-foreground disabled:opacity-60 sm:mt-2.5 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
                   >
                     <ShoppingBag size={13} />
                     {t('Move to cart', 'ব্যাগে যোগ করুন')}
