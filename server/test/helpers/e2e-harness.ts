@@ -87,7 +87,11 @@ export interface TestServer {
 }
 
 /** Spawn the compiled app on a free port and wait until it serves requests. */
-export async function bootServer(port: number): Promise<TestServer> {
+export async function bootServer(
+  port: number,
+  /** Extra env for the spawned app (e.g. PAYMENT_CALLBACK_SECRET). */
+  env: Record<string, string> = {},
+): Promise<TestServer> {
   const child = spawn('node', ['dist/main.js'], {
     cwd: SERVER_DIR,
     env: {
@@ -95,6 +99,7 @@ export async function bootServer(port: number): Promise<TestServer> {
       PORT: String(port),
       DB_DATABASE: TEST_DB,
       TYPEORM_LOGGING: 'false',
+      ...env,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
