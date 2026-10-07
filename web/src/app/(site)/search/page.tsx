@@ -20,8 +20,8 @@ export default async function SearchPage({
   return (
     <div className="bg-background">
       <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:py-5">
-          <h1 className="text-xl font-extrabold text-foreground sm:text-2xl">
+        <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-5">
+          <h1 className="text-base font-extrabold text-foreground sm:text-2xl">
             {query ? (
               <>
                 Results for{' '}
@@ -35,7 +35,7 @@ export default async function SearchPage({
       </div>
       <Suspense
         fallback={
-          <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+          <div className="mx-auto max-w-6xl px-4 py-3 sm:py-8">
             <ProductGridSkeleton count={8} />
           </div>
         }
