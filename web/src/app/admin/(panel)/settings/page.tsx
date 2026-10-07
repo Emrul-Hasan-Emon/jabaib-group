@@ -1,8 +1,7 @@
-export default function Page() {
-  return (
-    <div>
-      <h1 className="mb-2 text-2xl font-bold capitalize">settings</h1>
-      <p className="text-sm text-gray-500">Coming in a later phase.</p>
-    </div>
-  );
+import { redirect } from 'next/navigation';
+
+// Settings is now a submenu — see /admin/page-settings, shipping-zones,
+// system-settings, languages, locations, admin-users.
+export default function SettingsPage() {
+  redirect('/admin/page-settings');
 }

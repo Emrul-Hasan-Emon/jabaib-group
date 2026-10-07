@@ -140,7 +140,9 @@ export function getCursorPaginateFromSortedArray(
   const hasNextPage = paginatedData.length === limit;
   const items = hasNextPage ? paginatedData.slice(0, limit - 1) : paginatedData;
   const nextCursor =
-    hasNextPage && items.length > 0 ? items[items.length - 1][cursorField] : null;
+    hasNextPage && items.length > 0
+      ? items[items.length - 1][cursorField]
+      : null;
 
   return { items, nextCursor, hasNextPage };
 }

@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
-import { uploadFile } from '@/lib/admin-upload';
+import { uploadImage } from '@/lib/admin-upload';
+import { flattenCategoryTree, type CategoryTree, type FlatCategory } from '@/lib/category-tree';
 
 interface Category {
   id: number;
@@ -29,20 +30,48 @@ const empty = {
   isActive: true,
 };
 
+/** Flat category list → indented, depth-aware options for a tree select. */
+function useTreeOptions(
+  rows: FlatCategory[],
+  excludeId?: number,
+): Array<{ id: number; label: string }> {
+  return useMemo(() => {
+    const children = new Map<number | null, FlatCategory[]>();
+    for (const c of rows) {
+      const key = c.parentId ?? null;
+      if (!children.has(key)) children.set(key, []);
+      children.get(key)!.push(c);
+    }
+    const out: Array<{ id: number; label: string }> = [];
+    const walk = (parentId: number | null, depth: number) => {
+      for (const c of children.get(parentId) ?? []) {
+        if (c.id === excludeId) continue;
+        out.push({ id: c.id, label: `${'—'.repeat(depth)}${c.name}` });
+        walk(c.id, depth + 1);
+      }
+    };
+    walk(null, 0);
+    return out;
+  }, [rows, excludeId]);
+}
+
 export function CategoryForm({ categoryId }: { categoryId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
   const isEdit = categoryId !== undefined;
 
   const [form, setForm] = useState(empty);
-  const [rows, setRows] = useState<Category[]>([]);
+  const [rows, setRows] = useState<FlatCategory[]>([]);
   const [image, setImage] = useState<{ imageUrl: string; imagePath: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const treeOptions = useTreeOptions(rows, categoryId);
 
   const load = useCallback(async () => {
-    const res = await api.get<{ data: Category[] }>('/v1/admin/category?page=0&size=100');
-    setRows(res.data);
+    const nodes = await api.get<CategoryTree[]>('/v1/admin/category/tree');
+    setRows(flattenCategoryTree(nodes));
   }, [api]);
 
   useEffect(() => {
@@ -66,20 +95,22 @@ export function CategoryForm({ categoryId }: { categoryId?: number }) {
   const onImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setBusy(true);
+    setUploading(true);
     try {
-      const up = await uploadFile(file, 'category');
+      const up = await uploadImage(file, 'category');
       setImage({ imageUrl: up.url, imagePath: up.path });
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
-      setBusy(false);
+      setUploading(false);
     }
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setBusy(true);
     const payload: Record<string, unknown> = {
       name: form.name,
       nameBN: form.nameBN || undefined,
@@ -100,6 +131,8 @@ export function CategoryForm({ categoryId }: { categoryId?: number }) {
       router.push('/admin/categories');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -126,9 +159,9 @@ export function CategoryForm({ categoryId }: { categoryId?: number }) {
           </label>
           <label className="text-sm">Parent category
             <select className="mt-1 w-full rounded-md border border-input px-3 py-2" value={form.parentId} onChange={(e) => setForm({ ...form, parentId: e.target.value })}>
-              <option value="">— Root —</option>
-              {rows.filter((r) => r.id !== categoryId).map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
+              <option value="">— Root (no parent) —</option>
+              {treeOptions.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </label>
@@ -138,12 +171,33 @@ export function CategoryForm({ categoryId }: { categoryId?: number }) {
           <label className="flex items-center gap-2 text-sm md:pt-6">
             <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} /> Active
           </label>
-          <label className="text-sm">Image
-            <input type="file" accept="image/*" onChange={onImageChange} className="mt-1 block text-sm" />
-            {image && <span className="mt-1 block truncate text-xs text-muted-foreground">{image.imageUrl}</span>}
-          </label>
         </div>
-        <button disabled={busy} className="mt-4 rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+
+        <div className="mt-5">
+          <span className="text-sm font-medium">Cover image</span>
+          <div className="mt-2 flex items-start gap-4 rounded-lg border border-dashed border-border p-4">
+            {image ? (
+              <>
+                <img src={image.imageUrl} alt="preview" className="h-24 w-24 rounded-lg border border-border object-cover" />
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-muted-foreground">{image.imageUrl}</span>
+                  <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium">
+                    Change image
+                    <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
+                  </label>
+                  <button type="button" onClick={() => setImage(null)} className="text-left text-xs text-red-600">Remove image</button>
+                </div>
+              </>
+            ) : (
+              <label className="flex w-full cursor-pointer flex-col items-center justify-center gap-1 py-6 text-center text-sm text-muted-foreground">
+                <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
+                {uploading ? 'Uploading…' : 'Click to upload a cover image (JPG / PNG / WEBP)'}
+              </label>
+            )}
+          </div>
+        </div>
+
+        <button disabled={busy || uploading} className="mt-5 rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
           {isEdit ? 'Update category' : 'Create category'}
         </button>
       </form>

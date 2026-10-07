@@ -216,13 +216,17 @@
           }
         },
         {
-          "name": "Delete SKU",
+          "name": "Deactivate SKU (no delete endpoint — deactivate instead)",
           "request": {
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "url": {
@@ -236,6 +240,10 @@
                 "sku",
                 "1"
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
             }
           }
         }

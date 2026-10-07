@@ -17,7 +17,7 @@ import {
   ProductMedia,
   ProductSKU,
   ProductSKUVariant,
-  ProductLabel,
+  Collection,
   Wishlist,
   Review,
   Cart,
@@ -62,7 +62,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   productMedia: Repository<ProductMedia>;
   productSKU: Repository<ProductSKU>;
   productSKUVariant: Repository<ProductSKUVariant>;
-  productLabel: Repository<ProductLabel>;
+  collection: Repository<Collection>;
   wishlist: Repository<Wishlist>;
   review: Repository<Review>;
   cart: Repository<Cart>;
@@ -115,8 +115,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     private readonly productSKURepository: Repository<ProductSKU>,
     @InjectRepository(ProductSKUVariant)
     private readonly productSKUVariantRepository: Repository<ProductSKUVariant>,
-    @InjectRepository(ProductLabel)
-    private readonly productLabelRepository: Repository<ProductLabel>,
+    @InjectRepository(Collection)
+    private readonly collectionRepository: Repository<Collection>,
     @InjectRepository(Wishlist)
     private readonly wishlistRepository: Repository<Wishlist>,
     @InjectRepository(Review)
@@ -175,7 +175,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.productMedia = this.productMediaRepository;
     this.productSKU = this.productSKURepository;
     this.productSKUVariant = this.productSKUVariantRepository;
-    this.productLabel = this.productLabelRepository;
+    this.collection = this.collectionRepository;
     this.wishlist = this.wishlistRepository;
     this.review = this.reviewRepository;
     this.cart = this.cartRepository;

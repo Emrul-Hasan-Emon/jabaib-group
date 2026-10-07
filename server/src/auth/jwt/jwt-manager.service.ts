@@ -15,7 +15,8 @@ export class JwtManagerService {
 
   createAccessToken(payload: JwtPayload): string {
     return this.jwtService.sign(payload, {
-      expiresIn: (this.configService.get<string>('JWT_DURATION') ?? '1d') as SignOptions['expiresIn'],
+      expiresIn: (this.configService.get<string>('JWT_DURATION') ??
+        '1d') as SignOptions['expiresIn'],
     });
   }
 
@@ -24,10 +25,15 @@ export class JwtManagerService {
     loginDetails?: { userAgent?: string; origin?: string },
   ): Promise<string> {
     const token = this.jwtService.sign(
-      { sub: payload.sub, id: payload.id, type: payload.type, tokenVersion: 'refresh' },
       {
-        expiresIn:
-          (this.configService.get<string>('JWT_REFRESH_DURATION') ?? '30d') as SignOptions['expiresIn'],
+        sub: payload.sub,
+        id: payload.id,
+        type: payload.type,
+        tokenVersion: 'refresh',
+      },
+      {
+        expiresIn: (this.configService.get<string>('JWT_REFRESH_DURATION') ??
+          '30d') as SignOptions['expiresIn'],
       },
     );
     await this.database.authToken.save({

@@ -9,11 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminAttributeService } from '../services/admin-attribute.service';
 import { CreateAttributeDto } from '../dtos/create-attribute.dto';
 import { UpdateAttributeDto } from '../dtos/update-attribute.dto';

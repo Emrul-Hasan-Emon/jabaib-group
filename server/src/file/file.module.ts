@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { FileHandleService } from './services/file-handle.service';
-import { FileController } from './controllers/file.controller';
 
+/**
+ * Low-level disk storage for uploads. There is NO generic public file API —
+ * each feature exposes its own upload/replace/remove endpoints through its
+ * admin controller and resolves its folder from `upload-folders.ts`.
+ */
 @Module({
-  controllers: [FileController],
   providers: [FileHandleService],
   exports: [FileHandleService],
 })

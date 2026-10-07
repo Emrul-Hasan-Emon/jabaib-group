@@ -1,10 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateAttributeValueDto } from './create-attribute-value.dto';
 
 export class CreateAttributeDto {
   @ApiProperty()
@@ -38,4 +35,12 @@ export class CreateAttributeDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    type: [CreateAttributeValueDto],
+    description: 'Values to create along with the attribute',
+  })
+  @IsOptional()
+  @Type(() => CreateAttributeValueDto)
+  values?: CreateAttributeValueDto[];
 }

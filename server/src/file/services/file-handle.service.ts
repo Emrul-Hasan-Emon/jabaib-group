@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
@@ -41,12 +46,21 @@ export class FileHandleService implements OnModuleInit {
     this.logger.log(`Upload root: ${this.uploadRoot}`);
   }
 
+  /**
+   * Guarantee the target folder exists before uploading. Works for nested
+   * paths too (product/sku, product/media): every parent is created.
+   * No-op when the folder is already present.
+   */
+  ensureFolderFor(folder: string): void {
+    const targetDir = path.join(this.uploadRoot, this.brandFolder, folder);
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
   ): Promise<UploadedFileInfo> {
-    const targetDir = path.join(this.uploadRoot, this.brandFolder, folder);
-    fs.mkdirSync(targetDir, { recursive: true });
+    this.ensureFolderFor(folder);
 
     const ext = path.extname(file.originalname);
     const unique = `${Date.now()}-${randomBytes(6).toString('hex')}`;
@@ -56,7 +70,10 @@ export class FileHandleService implements OnModuleInit {
       .slice(0, 60);
     const fileName = `${baseName}-${unique}${ext}`;
 
-    fs.writeFileSync(path.join(targetDir, fileName), file.buffer);
+    fs.writeFileSync(
+      path.join(this.uploadRoot, this.brandFolder, folder, fileName),
+      file.buffer,
+    );
 
     const relativePath = path.posix.join(this.brandFolder, folder, fileName);
     return {
@@ -100,6 +117,27 @@ export class FileHandleService implements OnModuleInit {
       }
     }
     return { removed, failed };
+  }
+
+  /**
+   * Best-effort delete used during replace/remove flows: a missing file is
+   * "already gone" and must never fail the DB update. Only a path that is
+   * outside the upload root (protected by `resolve`) is a true failure,
+   * and even then we report false instead of throwing.
+   */
+  removeIfExists(filePathOrUrl: string): boolean {
+    try {
+      return this.removeFile(filePathOrUrl);
+    } catch {
+      return false;
+    }
+  }
+
+  /** True when a stored path/url lives inside a given feature folder. */
+  belongsTo(folder: string, filePathOrUrl: string): boolean {
+    if (!filePathOrUrl) return false;
+    const cleaned = filePathOrUrl.replace(/^\/+/, '');
+    return cleaned.startsWith(`${this.brandFolder}/${folder}/`);
   }
 
   exists(filePathOrUrl: string): boolean {

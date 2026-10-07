@@ -79,7 +79,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/v1/admin/product?page=0&size=10&q=&categoryId=&productLabelId=&isPublished=&isFeatured=&isActive=&sort=createdAt:desc",
+              "raw": "{{baseUrl}}/v1/admin/product?page=0&size=10&q=&categoryId=&collectionId=&isPublished=&isFeatured=&isActive=&sort=createdAt:desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -106,7 +106,7 @@
                   "value": ""
                 },
                 {
-                  "key": "productLabelId",
+                  "key": "collectionId",
                   "value": ""
                 },
                 {
@@ -180,7 +180,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Classic T-Shirt\",\n  \"nameBN\": \"\\u099f\\u09bf-\\u09b6\\u09be\\u09b0\\u09cd\\u099f\",\n  \"categoryId\": 1,\n  \"productLabelId\": null,\n  \"isFeatured\": false,\n  \"isPublished\": true,\n  \"isActive\": true\n}"
+              "raw": "{\n  \"name\": \"Classic T-Shirt\",\n  \"nameBN\": \"\\u099f\\u09bf-\\u09b6\\u09be\\u09b0\\u09cd\\u099f\",\n  \"categoryId\": 1,\n  \"collectionId\": null,\n  \"isFeatured\": false,\n  \"isPublished\": true,\n  \"isActive\": true\n}"
             }
           }
         },

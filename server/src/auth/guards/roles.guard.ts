@@ -32,8 +32,14 @@ export class RolesGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException('Authentication required');
     }
-    if (user.type !== 'admin' || !user.role || !requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('You do not have permission for this action');
+    if (
+      user.type !== 'admin' ||
+      !user.role ||
+      !requiredRoles.includes(user.role)
+    ) {
+      throw new ForbiddenException(
+        'You do not have permission for this action',
+      );
     }
     return true;
   }

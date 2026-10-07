@@ -19,7 +19,10 @@ export class UserProductController {
   constructor(private readonly service: UserProductService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Browse published products' })
+  @ApiOperation({
+    summary:
+      'Browse published products (q, categoryId, collectionId, isFeatured, sort)',
+  })
   list(
     @PaginationParams() pagination: Pagination,
     @Query() query: Record<string, string>,
@@ -27,8 +30,22 @@ export class UserProductController {
     return this.service.list(pagination, query);
   }
 
+  @Get('facets')
+  @ApiOperation({ summary: 'Attribute facet counts for a product scope' })
+  facets(@Query() query: Record<string, string>) {
+    return this.service.facets(query);
+  }
+
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Product detail by slug (storefront URL)' })
+  async findBySlug(@Param('slug') slug: string) {
+    const product = await this.service.findBySlug(slug);
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Product detail' })
+  @ApiOperation({ summary: 'Product detail by id' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const product = await this.service.findOne(id);
     if (!product) throw new NotFoundException('Product not found');
