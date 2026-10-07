@@ -10,6 +10,7 @@ import { CartItem } from '../../database/entities/cart-item.entity';
 import { Product } from '../../database/entities/product.entity';
 import { ProductSKU } from '../../database/entities/product-sku.entity';
 import { effectiveSkuPrice } from '../../catalog/user/utils/product-summary';
+import { skuLabel } from '../../catalog/utils/sku-label';
 import { AddCartItemDto } from '../dtos/cart.dto';
 
 /** One cart line as the storefront needs it (card-ready product snapshot). */
@@ -125,13 +126,6 @@ export class UserCartService {
     return fallback;
   }
 
-  private skuLabel(sku: ProductSKU): string {
-    return (sku.skuVariants ?? [])
-      .map((v) => v.attributeValue?.name ?? '')
-      .filter(Boolean)
-      .join(' / ');
-  }
-
   private lineView(item: CartItem): CartLineView {
     const product = item.product;
     const media = product?.media ?? [];
@@ -147,7 +141,7 @@ export class UserCartService {
       nameBN: product?.nameBN ?? null,
       slug: product?.slug ?? '',
       image: primary,
-      skuLabel: this.skuLabel(item.sku ?? ({} as ProductSKU)),
+      skuLabel: skuLabel(item.sku ?? ({} as ProductSKU)),
       sku: item.sku?.sku ?? '',
       unitPrice,
       unitDiscountedPrice,
