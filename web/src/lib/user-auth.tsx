@@ -16,12 +16,21 @@ export interface UserProfile {
   email: string | null;
   phone: string | null;
   isActive: boolean;
+  createdAt?: string;
+}
+
+export interface RegisterInput {
+  name: string;
+  email?: string;
+  phone?: string;
+  password: string;
 }
 
 interface UserAuthState {
   status: 'loading' | 'authed' | 'guest';
   user: UserProfile | null;
   login: (emailOrPhone: string, password: string) => Promise<void>;
+  register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   api: ReturnType<typeof createApiClient>;
 }
@@ -105,6 +114,32 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     [api, setTokens],
   );
 
+  const register = useCallback(
+    async (input: RegisterInput) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/v1/user/auth/register`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(input),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(
+          Array.isArray(data.message) ? data.message[0] : data.message?.toString() ?? 'Registration failed',
+        );
+      setTokens({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
+      const me = await api.get<UserProfile>('/v1/user/auth/me');
+      setUser(me);
+      setStatus('authed');
+    },
+    [api, setTokens],
+  );
+
   const logout = useCallback(async () => {
     const tokens = getTokens();
     if (tokens?.refreshToken) {
@@ -127,7 +162,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
   }, [getTokens, setTokens]);
 
   return (
-    <Ctx.Provider value={{ status, user, login, logout, api }}>
+    <Ctx.Provider value={{ status, user, login, register, logout, api }}>
       {children}
     </Ctx.Provider>
   );

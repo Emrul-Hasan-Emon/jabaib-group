@@ -15,6 +15,8 @@ import {
 import { AdminCountryService } from './services/admin-country.service';
 import { AdminDivisionService } from './services/admin-division.service';
 import { AdminDistrictService } from './services/admin-district.service';
+import { UserLocationController } from './controllers/user-location.controller';
+import { UserLocationService } from './services/user-location.service';
 
 @Module({
   controllers: [
@@ -25,6 +27,7 @@ import { AdminDistrictService } from './services/admin-district.service';
     AdminCountryController,
     AdminDivisionController,
     AdminDistrictController,
+    UserLocationController,
   ],
   providers: [
     AdminPageSettingService,
@@ -34,6 +37,7 @@ import { AdminDistrictService } from './services/admin-district.service';
     AdminCountryService,
     AdminDivisionService,
     AdminDistrictService,
+    UserLocationService,
   ],
 })
 export class SettingsModule {}
