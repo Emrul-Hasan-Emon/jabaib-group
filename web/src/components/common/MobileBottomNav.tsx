@@ -37,7 +37,7 @@ export function MobileBottomNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-4 py-2 text-[11px] font-medium ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 text-[11px] font-medium ${
                 isActive ? 'text-primary' : 'text-nav-foreground'
               }`}
             >
@@ -48,8 +48,9 @@ export function MobileBottomNav() {
         })}
         <button
           onClick={openDrawer}
-          className={`relative flex flex-col items-center gap-0.5 px-4 py-2 text-[11px] font-medium ${
-            pathname === '/cart' ? 'text-primary' : 'text-nav-foreground'
+          className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 text-[11px] font-medium ${
+            // the cart lives in the drawer + /checkout (there is no /cart page)
+            pathname === '/checkout' ? 'text-primary' : 'text-nav-foreground'
           }`}
         >
           <span className="relative">

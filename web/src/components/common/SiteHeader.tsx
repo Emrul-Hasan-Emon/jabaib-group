@@ -65,7 +65,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40">
       {/* top utility bar */}
       <div className="bg-topbar text-[11px] text-topbar-foreground">
-        <div className="mx-auto flex h-9 max-w-6xl items-center justify-between gap-3 px-4">
+        <div className="mx-auto hidden h-9 max-w-6xl items-center justify-between gap-3 px-4 sm:flex">
           <div className="flex min-w-0 items-center gap-4">
             <a
               href="tel:+8801000000000"
@@ -91,7 +91,7 @@ export function SiteHeader() {
 
       {/* main bar */}
       <div className="border-b border-border bg-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16">
           <Link href="/" className="shrink-0 text-xl font-extrabold tracking-tight text-primary">
             Jabaib
           </Link>
@@ -184,7 +184,7 @@ export function SiteHeader() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('Search products…')}
-                className="w-full rounded-full border border-input bg-muted/40 py-2 pl-9 pr-4 text-sm outline-none transition focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/40"
+                className="w-full rounded-full border border-input bg-muted/40 py-1.5 pl-8 pr-3 text-[13px] outline-none transition focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/40 sm:py-2 sm:pl-9 sm:pr-4 sm:text-sm"
               />
             </div>
           </form>
