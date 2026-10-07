@@ -5,8 +5,12 @@ import { AdminCouponHistoryController } from './coupon/controllers/admin-coupon-
 import { AdminCouponService } from './coupon/services/admin-coupon.service';
 import { AdminBannerController } from './banner/controllers/admin-banner.controller';
 import { AdminBannerService } from './banner/services/admin-banner.service';
+import { UserBannerController } from './banner/controllers/user-banner.controller';
+import { UserBannerService } from './banner/services/user-banner.service';
 import { AdminHomepageSectionController } from './homepage/controllers/admin-homepage-section.controller';
 import { AdminHomepageSectionService } from './homepage/services/admin-homepage-section.service';
+import { UserHomepageSectionController } from './homepage/controllers/user-homepage-section.controller';
+import { UserHomepageSectionService } from './homepage/services/user-homepage-section.service';
 
 @Module({
   imports: [FileModule],
@@ -15,11 +19,15 @@ import { AdminHomepageSectionService } from './homepage/services/admin-homepage-
     AdminCouponHistoryController,
     AdminBannerController,
     AdminHomepageSectionController,
+    UserBannerController,
+    UserHomepageSectionController,
   ],
   providers: [
     AdminCouponService,
     AdminBannerService,
     AdminHomepageSectionService,
+    UserBannerService,
+    UserHomepageSectionService,
   ],
 })
 export class MarketingModule {}

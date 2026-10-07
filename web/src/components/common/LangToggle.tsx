@@ -1,30 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLocale } from '@/lib/locale';
+import { Languages } from 'lucide-react';
 
-const KEY = 'jabaibLocale';
-
-/** EN/BN content toggle for admin-entered bilingual fields. */
-export function LangToggle() {
-  const [locale, setLocale] = useState<'en' | 'bn'>('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem(KEY);
-    if (saved === 'bn') setLocale('bn');
-  }, []);
-
-  const toggle = () => {
-    const next = locale === 'en' ? 'bn' : 'en';
-    setLocale(next);
-    localStorage.setItem(KEY, next);
-  };
-
+/** EN/BN content toggle backed by the shared locale context. */
+export function LangToggle({ onDark = false }: { onDark?: boolean }) {
+  const { locale, setLocale } = useLocale();
   return (
     <button
-      onClick={toggle}
-      className="rounded-md border px-2 py-1 text-xs font-semibold uppercase"
+      onClick={() => setLocale(locale === 'en' ? 'bn' : 'en')}
+      className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase transition ${
+        onDark
+          ? 'border-white/20 text-white/90 hover:bg-white/10'
+          : 'border-border text-nav-foreground hover:bg-muted'
+      }`}
       title="Content language"
     >
+      <Languages size={12} />
       {locale === 'en' ? 'EN' : 'বাং'}
     </button>
   );

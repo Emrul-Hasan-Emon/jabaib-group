@@ -4,21 +4,22 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuthService, LoginDetails } from '../services/auth.service';
 import {
+  ChangePasswordDto,
   LogoutDto,
   RefreshTokenDto,
   UserLoginDto,
 } from '../dto/login.dto';
+import { RegisterUserDto } from '../dto/user-auth.dto';
+import { UpdateProfileDto } from '../dto/user-auth.dto';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import type { JwtPayload } from '../jwt/jwt-payload';
@@ -38,17 +39,61 @@ export class UserAuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Customer login with email/phone + password' })
   userLogin(@Body() dto: UserLoginDto, @Req() req: Request) {
-    return this.authService.userLogin(dto.emailOrPhone, dto.password, this.loginDetailsFrom(req));
+    return this.authService.userLogin(
+      dto.emailOrPhone,
+      dto.password,
+      this.loginDetailsFrom(req),
+    );
+  }
+
+  @Public()
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({ summary: 'Customer self-registration (auto-login)' })
+  userRegister(@Body() dto: RegisterUserDto, @Req() req: Request) {
+    return this.authService.register(dto, this.loginDetailsFrom(req));
+  }
+
+  @Patch('profile')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update own profile (name / phone)' })
+  userUpdateProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(user, dto);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Customer changes their own password' })
+  userChangePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      user,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Rotate a customer refresh token for a new token pair' })
+  @ApiOperation({
+    summary: 'Rotate a customer refresh token for a new token pair',
+  })
   userRefresh(@Body() dto: RefreshTokenDto, @Req() req: Request) {
-    return this.authService.refresh(dto.refreshToken, this.loginDetailsFrom(req));
+    return this.authService.refresh(
+      dto.refreshToken,
+      this.loginDetailsFrom(req),
+    );
   }
 
   @Public()
