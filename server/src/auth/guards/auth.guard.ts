@@ -24,22 +24,36 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
+
+    // Public routes still read a token when one is sent: handlers such as the
+    // cart and coupon preview need to tell a guest from a signed-in customer.
+    // A missing or invalid token simply means "guest".
+    if (isPublic) {
+      if (token) {
+        await this.attachUser(request, token).catch(() => undefined);
+      }
+      return true;
+    }
+
     if (!token) {
       throw new UnauthorizedException('Authentication required');
     }
     try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
-      (request as Request & { user: JwtPayload }).user = payload;
+      await this.attachUser(request, token);
       return true;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
+  }
+
+  private async attachUser(request: Request, token: string): Promise<void> {
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+    });
+    (request as Request & { user: JwtPayload }).user = payload;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

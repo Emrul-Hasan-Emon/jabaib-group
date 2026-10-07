@@ -32,6 +32,26 @@ function uploadRequest(featurePath) {
   };
 }
 
+/** Customer-scoped upload (e.g. return photos) — uses the customer token. */
+function customerUploadRequest(featurePath) {
+  return {
+    method: 'POST',
+    header: [
+      { key: 'Content-Type', value: 'multipart/form-data; boundary=<computed>' },
+      { key: 'Authorization', value: 'Bearer {{userAccessToken}}' },
+    ],
+    url: {
+      raw: `${BASE}${featurePath}`,
+      host: [BASE].concat('v1'),
+      path: featurePath.split('/').filter(Boolean),
+    },
+    body: {
+      mode: 'formdata',
+      formdata: [{ key: 'file', type: 'file', src: [] }],
+    },
+  };
+}
+
 function removeRequest(featurePath, query) {
   const raw = query
     ? `${BASE}${featurePath}?${query.map((q) => `${q.key}=${q.value}`).join('&')}`
@@ -99,6 +119,9 @@ const collections = {
   Admin: [
     { name: 'Upload avatar (then set imageUrl/imagePath)', request: uploadRequest('/v1/admin/admin-user/upload-image') },
     { name: 'Remove avatar (deletes file + clears fields)', request: removeRequest('/v1/admin/admin-user/1/image') },
+  ],
+  'Order return': [
+    { name: 'Upload a return photo (then attach the path to the return request)', request: customerUploadRequest('/v1/user/order/return/upload-image') },
   ],
 };
 

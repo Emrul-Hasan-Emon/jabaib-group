@@ -670,6 +670,51 @@
           }
         }
       ]
+    },
+    {
+      "name": "Order return",
+      "item": [
+        {
+          "name": "Upload a return photo (then attach the path to the return request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data; boundary=<computed>"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order/return/upload-image",
+              "host": [
+                "http://localhost:3000",
+                "v1"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order",
+                "return",
+                "upload-image"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
 }

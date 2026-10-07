@@ -111,14 +111,15 @@ export function createApiClient({
   }
 
   return {
-    get: <T = unknown>(path: string) => request<T>(path),
-    post: <T = unknown>(path: string, json?: unknown) =>
-      request<T>(path, { method: 'POST', json }),
-    put: <T = unknown>(path: string, json?: unknown) =>
-      request<T>(path, { method: 'PUT', json }),
-    del: <T = unknown>(path: string) =>
-      request<T>(path, { method: 'DELETE' }),
-    patch: <T = unknown>(path: string, json?: unknown) =>
-      request<T>(path, { method: 'PATCH', json }),
+    get: <T = unknown>(path: string, headers?: Record<string, string>) =>
+      request<T>(path, { headers }),
+    post: <T = unknown>(path: string, json?: unknown, headers?: Record<string, string>) =>
+      request<T>(path, { method: 'POST', json, headers }),
+    put: <T = unknown>(path: string, json?: unknown, headers?: Record<string, string>) =>
+      request<T>(path, { method: 'PUT', json, headers }),
+    del: <T = unknown>(path: string, headers?: Record<string, string>) =>
+      request<T>(path, { method: 'DELETE', headers }),
+    patch: <T = unknown>(path: string, json?: unknown, headers?: Record<string, string>) =>
+      request<T>(path, { method: 'PATCH', json, headers }),
   };
 }

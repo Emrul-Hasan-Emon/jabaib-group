@@ -13,6 +13,9 @@ const path = require('path');
 
 const BASE = 'http://localhost:3000';
 
+/** Guests identify their cart with this header. */
+const CART_SESSION = [{ key: 'x-cart-session', value: 'postman-guest-cart-0001' }];
+
 function authHeaders() {
   return [
     { key: 'Content-Type', value: 'application/json' },
@@ -20,7 +23,7 @@ function authHeaders() {
   ];
 }
 
-function request({ method, path: pathArr, body, query, useUserToken }) {
+function request({ method, path: pathArr, body, query, useUserToken, headers }) {
   const url = {
     raw: `${BASE}/v1/${pathArr.join('/')}`,
     host: [BASE],
@@ -38,7 +41,7 @@ function request({ method, path: pathArr, body, query, useUserToken }) {
         { key: 'Authorization', value: 'Bearer {{userAccessToken}}' },
       ]
     : authHeaders();
-  const item = { method, header, url };
+  const item = { method, header: [...header, ...(headers ?? [])], url };
   if (body) {
     item.body = { mode: 'raw', raw: JSON.stringify(body, null, 2) };
   }
@@ -165,6 +168,31 @@ const users = makeCollection(
       { name: 'My wishlist ids (heart states)', request: request({ method: 'GET', path: ['user', 'wishlist', 'ids'], useUserToken: true }) },
       { name: 'Add to wishlist', request: request({ method: 'POST', path: ['user', 'wishlist', '1'], useUserToken: true }) },
       { name: 'Remove from wishlist', request: request({ method: 'DELETE', path: ['user', 'wishlist', '1'], useUserToken: true }) },
+    ]),
+    folder('Cart (customer / guest)', [
+      { name: 'My cart (guest: send x-cart-session; signed-in: token wins)', request: request({ method: 'GET', path: ['user', 'cart'], headers: CART_SESSION }) },
+      { name: 'Issue a fresh guest cart session id', request: request({ method: 'POST', path: ['user', 'cart', 'session'] }) },
+      { name: 'Add item (omit productSKUId to let the server pick the cheapest in-stock SKU)', request: request({ method: 'POST', path: ['user', 'cart', 'items'], body: { productId: 1, productSKUId: 1, quantity: 2 }, headers: CART_SESSION }) },
+      { name: 'Change quantity (clamped to live stock)', request: request({ method: 'PATCH', path: ['user', 'cart', 'items', '1'], body: { quantity: 3 }, headers: CART_SESSION }) },
+      { name: 'Remove one line', request: request({ method: 'DELETE', path: ['user', 'cart', 'items', '1'], headers: CART_SESSION }) },
+      { name: 'Empty the cart', request: request({ method: 'DELETE', path: ['user', 'cart'], headers: CART_SESSION }) },
+      { name: 'Merge the guest cart into mine (right after login)', request: request({ method: 'POST', path: ['user', 'cart', 'merge'], body: { sessionId: 'postman-guest-cart-0001' }, useUserToken: true }) },
+    ]),
+    folder('Coupons (customer)', [
+      { name: 'Preview a coupon against a basket subtotal (never consumes a use)', request: request({ method: 'GET', path: ['user', 'coupon', 'EID25', 'preview'], query: [{ key: 'subtotal', value: '2000' }], useUserToken: true }) },
+    ]),
+    folder('Checkout (customer)', [
+      { name: 'Preview totals (address, delivery charge from ShippingZone, coupon, total)', request: request({ method: 'POST', path: ['user', 'checkout', 'preview'], body: { addressId: 1, deliveryType: 'inside_dhaka', paymentMethod: 'cod', couponCode: 'EID25' }, useUserToken: true }) },
+      { name: 'Preview totals with an inline address + online payment reference', request: request({ method: 'POST', path: ['user', 'checkout', 'preview'], body: { recipientName: 'Rafi Ahmed', phone: '01712345678', address: 'House 12, Road 5, Dhanmondi', divisionId: 1, districtId: 240, zipCode: '1205', deliveryType: 'outside_dhaka', paymentMethod: 'bkash', transactionId: '9ABC123XYZ' }, useUserToken: true }) },
+    ]),
+    folder('Orders (customer)', [
+      { name: 'My orders (paginated, newest first)', request: request({ method: 'GET', path: ['user', 'order'], query: [{ key: 'page', value: '0' }, { key: 'size', value: '10' }], useUserToken: true }) },
+      { name: 'Order detail (items, timeline, payments, returns, canCancel/canReturn)', request: request({ method: 'GET', path: ['user', 'order', '1'], useUserToken: true }) },
+      { name: 'Place order (atomic: order + items + address + payment + coupon usage)', request: request({ method: 'POST', path: ['user', 'order'], body: { addressId: 1, deliveryType: 'inside_dhaka', paymentMethod: 'cod', couponCode: 'EID25', note: 'Please call before delivery' }, useUserToken: true }) },
+      { name: 'Place order with bkash + transaction reference', request: request({ method: 'POST', path: ['user', 'order'], body: { recipientName: 'Rafi Ahmed', phone: '01712345678', address: 'House 12, Road 5, Dhanmondi', deliveryType: 'outside_dhaka', paymentMethod: 'bkash', transactionId: '9ABC123XYZ' }, useUserToken: true }) },
+      { name: 'Cancel my order (only while pending)', request: request({ method: 'POST', path: ['user', 'order', '1', 'cancel'], body: { reason: 'Ordered by mistake' }, useUserToken: true }) },
+      { name: 'Request a return (delivered orders, inside the 7-day window)', request: request({ method: 'POST', path: ['user', 'order', '1', 'return'], body: { reason: 'Fabric colour is different from the photo', items: [{ orderItemId: 1, quantity: 1, reason: 'Wrong shade' }], media: ['jabaib/order-return/photo.png'] }, useUserToken: true }) },
+      { name: 'Upload a return photo (then attach the returned path)', request: request({ method: 'POST', path: ['user', 'order', 'return', 'upload-image'], useUserToken: true }) },
     ]),
     folder('Banners', [
       { name: 'Active banners (optional ?position=hero)', request: request({ method: 'GET', path: ['user', 'banner'], query: [{ key: 'position', value: 'hero' }], useUserToken: true }) },

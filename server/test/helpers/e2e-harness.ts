@@ -147,9 +147,14 @@ export async function api(
   path: string,
   token: string | null,
   payload?: unknown,
+  /** Extra request headers (e.g. the guest cart session header). */
+  headers?: Record<string, string>,
 ): Promise<ApiResult> {
   const req = (request(baseUrl) as any)[method](path) as request.Test;
   if (token) req.set('Authorization', `Bearer ${token}`);
+  for (const [key, value] of Object.entries(headers ?? {})) {
+    req.set(key, value);
+  }
   if (payload !== undefined) req.send(payload as object);
   const res = await req;
   return { status: res.status, body: res.body };
