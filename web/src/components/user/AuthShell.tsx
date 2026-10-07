@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserAuth } from '@/lib/user-auth';
+import { nextPath } from '@/lib/next-path';
 import { LangToggle } from '@/components/common/LangToggle';
 
 /**
@@ -25,7 +26,10 @@ export function AuthShell({
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authed') router.replace('/user/dashboard');
+    // Safety net for an already-signed-in visitor hitting /login or /register.
+    // It must honour ?next= so it doesn't race the page's own post-submit
+    // redirect (which would drop the visitor on the dashboard mid-checkout).
+    if (status === 'authed') router.replace(nextPath());
   }, [status, router]);
 
   return (
