@@ -6,6 +6,7 @@ import {
 import { randomBytes } from 'node:crypto';
 import type { EntityManager } from 'typeorm';
 import { DatabaseService } from '../../../database/database.service';
+import { skuLabel } from '../../../catalog/utils/sku-label';
 import { CartItem } from '../../../database/entities/cart-item.entity';
 import { Coupon } from '../../../database/entities/coupon.entity';
 import { CouponHistoryLog } from '../../../database/entities/coupon-history-log.entity';
@@ -334,7 +335,7 @@ export class UserCheckoutService {
       name: line.name,
       slug: product?.slug,
       image: product?.thumbnailUrl ?? null,
-      skuLabel: line.skuData,
+      skuLabel: skuLabel(line.cartItem.sku),
       quantity: line.quantity,
       unitPrice: line.unitPrice,
       unitDiscountedPrice: line.unitDiscountedPrice,
