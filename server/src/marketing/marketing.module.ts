@@ -11,6 +11,8 @@ import { AdminHomepageSectionController } from './homepage/controllers/admin-hom
 import { AdminHomepageSectionService } from './homepage/services/admin-homepage-section.service';
 import { UserHomepageSectionController } from './homepage/controllers/user-homepage-section.controller';
 import { UserHomepageSectionService } from './homepage/services/user-homepage-section.service';
+import { UserCouponController } from './coupon/controllers/user-coupon.controller';
+import { UserCouponService } from './coupon/services/user-coupon.service';
 
 @Module({
   imports: [FileModule],
@@ -21,6 +23,7 @@ import { UserHomepageSectionService } from './homepage/services/user-homepage-se
     AdminHomepageSectionController,
     UserBannerController,
     UserHomepageSectionController,
+    UserCouponController,
   ],
   providers: [
     AdminCouponService,
@@ -28,6 +31,9 @@ import { UserHomepageSectionService } from './homepage/services/user-homepage-se
     AdminHomepageSectionService,
     UserBannerService,
     UserHomepageSectionService,
+    UserCouponService,
   ],
+  // Exported so checkout can validate coupons inside the order transaction.
+  exports: [UserCouponService],
 })
 export class MarketingModule {}

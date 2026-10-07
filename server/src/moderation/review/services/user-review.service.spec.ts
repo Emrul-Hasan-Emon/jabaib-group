@@ -49,6 +49,7 @@ describe('UserReviewService (customer reviews)', () => {
       softRemove: jest.Mock;
       createQueryBuilder: jest.Mock;
     };
+    orderItem: { findOne: jest.Mock };
   };
 
   beforeEach(async () => {
@@ -62,6 +63,7 @@ describe('UserReviewService (customer reviews)', () => {
         softRemove: jest.fn(async () => ({})),
         createQueryBuilder: jest.fn(() => qbResult([])),
       },
+      orderItem: { findOne: jest.fn(async () => null) },
     };
     const module = await Test.createTestingModule({
       providers: [
@@ -162,6 +164,47 @@ describe('UserReviewService (customer reviews)', () => {
       expect(created.comment).toBe('Excellent');
       expect(created.isApproved).toBe(false);
       expect(created.creatorType).toBe('user');
+    });
+
+    it('links the review to a delivered purchase when one exists', async () => {
+      db.orderItem.findOne.mockResolvedValue({
+        id: 12,
+        orderId: 5,
+        productId: 8,
+      });
+      await service.create(
+        {
+          sub: 'rafi@test.dev',
+          id: 7,
+          type: 'user' as const,
+          role: null,
+          userName: 'Rafi',
+        },
+        { productId: 8, rating: 5 },
+      );
+      expect(db.orderItem.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            productId: 8,
+            order: { userId: 7, status: 'delivered' },
+          }),
+        }),
+      );
+      expect(db.review.create.mock.calls[0][0].orderId).toBe(5);
+    });
+
+    it('leaves the review unverified without a delivered order', async () => {
+      await service.create(
+        {
+          sub: 'rafi@test.dev',
+          id: 7,
+          type: 'user' as const,
+          role: null,
+          userName: 'Rafi',
+        },
+        { productId: 8, rating: 4 },
+      );
+      expect(db.review.create.mock.calls[0][0].orderId).toBeUndefined();
     });
 
     it('rejects a second review for the same product', async () => {

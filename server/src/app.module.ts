@@ -10,6 +10,7 @@ import { FileModule } from './file/file.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { OrdersModule } from './orders/orders.module';
+import { CartModule } from './cart/cart.module';
 import { CustomersModule } from './customers/customers.module';
 import { MarketingModule } from './marketing/marketing.module';
 import { SettingsModule } from './settings/settings.module';
@@ -42,6 +43,7 @@ import { DatabaseExceptionFilter } from './auth/filters/database-exception.filte
     CatalogModule,
     ModerationModule,
     OrdersModule,
+    CartModule,
     CustomersModule,
     MarketingModule,
     SettingsModule,

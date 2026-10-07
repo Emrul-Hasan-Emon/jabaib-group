@@ -1,6 +1,6 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import {
   User,
   AdminUser,
@@ -196,5 +196,13 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.pageSettings = this.pageSettingsRepository;
     this.systemSetting = this.systemSettingRepository;
     this.language = this.languageRepository;
+  }
+
+  /**
+   * Escape hatch for writes that must be atomic (order placement writes an
+   * order, items, address, payment, coupon usage and history in one go).
+   */
+  transaction<T>(run: (manager: EntityManager) => Promise<T>): Promise<T> {
+    return this.dataSource.transaction(run);
   }
 }

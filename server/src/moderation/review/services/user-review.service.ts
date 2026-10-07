@@ -11,6 +11,7 @@ import {
 } from '../../../common/decorators/pagination-params';
 import { CreateUserReviewDto } from '../dtos/create-user-review.dto';
 import { Review } from '../../../database/entities/review.entity';
+import { OrderStatus } from '../../../database/enums/enums';
 
 /**
  * Customer-facing reviews. The public product feed only ever exposes
@@ -111,7 +112,7 @@ export class UserReviewService {
       rating: dto.rating,
       comment: dto.comment?.trim() || undefined,
       images: dto.images && dto.images.length ? dto.images : undefined,
-      orderId: undefined,
+      orderId: (await this.deliveredOrderItem(user.id, dto.productId))?.orderId,
       isApproved: false,
       createdBy: user.id,
       creatorType: 'user',
@@ -120,6 +121,20 @@ export class UserReviewService {
       this.database.review.create(data),
     );
     return { id: saved.id, isApproved: saved.isApproved };
+  }
+
+  /**
+   * Most recent DELIVERED order of this customer containing the product —
+   * links a review to a real purchase so it can be shown as verified.
+   */
+  private async deliveredOrderItem(userId: number, productId: number) {
+    return this.database.orderItem.findOne({
+      where: {
+        productId,
+        order: { userId, status: OrderStatus.DELIVERED },
+      },
+      order: { id: 'DESC' },
+    });
   }
 
   /** Authed: remove the caller's own review. */

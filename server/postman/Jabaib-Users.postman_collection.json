@@ -761,6 +761,575 @@
       ]
     },
     {
+      "name": "Cart (customer / guest)",
+      "item": [
+        {
+          "name": "My cart (guest: send x-cart-session; signed-in: token wins)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "x-cart-session",
+                "value": "postman-guest-cart-0001"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Issue a fresh guest cart session id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart/session",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart",
+                "session"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add item (omit productSKUId to let the server pick the cheapest in-stock SKU)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "x-cart-session",
+                "value": "postman-guest-cart-0001"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart/items",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"productSKUId\": 1,\n  \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Change quantity (clamped to live stock)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "x-cart-session",
+                "value": "postman-guest-cart-0001"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart/items/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart",
+                "items",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Remove one line",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "x-cart-session",
+                "value": "postman-guest-cart-0001"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart/items/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart",
+                "items",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Empty the cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "x-cart-session",
+                "value": "postman-guest-cart-0001"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Merge the guest cart into mine (right after login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/cart/merge",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "cart",
+                "merge"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"postman-guest-cart-0001\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coupons (customer)",
+      "item": [
+        {
+          "name": "Preview a coupon against a basket subtotal (never consumes a use)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/coupon/EID25/preview?subtotal=2000",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "coupon",
+                "EID25",
+                "preview"
+              ],
+              "query": [
+                {
+                  "key": "subtotal",
+                  "value": "2000"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkout (customer)",
+      "item": [
+        {
+          "name": "Preview totals (address, delivery charge from ShippingZone, coupon, total)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/checkout/preview",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "checkout",
+                "preview"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"couponCode\": \"EID25\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Preview totals with an inline address + online payment reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/checkout/preview",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "checkout",
+                "preview"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"divisionId\": 1,\n  \"districtId\": 240,\n  \"zipCode\": \"1205\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"paymentMethod\": \"bkash\",\n  \"transactionId\": \"9ABC123XYZ\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders (customer)",
+      "item": [
+        {
+          "name": "My orders (paginated, newest first)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order?page=0&size=10",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Order detail (items, timeline, payments, returns, canCancel/canReturn)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Place order (atomic: order + items + address + payment + coupon usage)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"couponCode\": \"EID25\",\n  \"note\": \"Please call before delivery\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Place order with bkash + transaction reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"paymentMethod\": \"bkash\",\n  \"transactionId\": \"9ABC123XYZ\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cancel my order (only while pending)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order/1/cancel",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order",
+                "1",
+                "cancel"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Ordered by mistake\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Request a return (delivered orders, inside the 7-day window)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order/1/return",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order",
+                "1",
+                "return"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Fabric colour is different from the photo\",\n  \"items\": [\n    {\n      \"orderItemId\": 1,\n      \"quantity\": 1,\n      \"reason\": \"Wrong shade\"\n    }\n  ],\n  \"media\": [\n    \"jabaib/order-return/photo.png\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload a return photo (then attach the returned path)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/order/return/upload-image",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "order",
+                "return",
+                "upload-image"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Banners",
       "item": [
         {

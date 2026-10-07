@@ -16,9 +16,10 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <LocaleProvider>
-          <CartProvider>
-            <UserAuthProvider>{children}</UserAuthProvider>
-          </CartProvider>
+          {/* UserAuthProvider wraps the cart: signed-in carts live server-side. */}
+          <UserAuthProvider>
+            <CartProvider>{children}</CartProvider>
+          </UserAuthProvider>
         </LocaleProvider>
       </body>
     </html>

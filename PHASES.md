@@ -218,13 +218,42 @@ site layout. Backend: 161 live routes all covered by Postman; unit 100/100, e2e 
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Cart (guest via session → merge on login), CartItem add/update/remove | ⬜ Not Started |
-| 2 | Coupon apply: validate (min order, limits, dates, per-user), discount preview, CouponHistoryLog write on order | ⬜ Not Started |
-| 3 | Checkout: address selection/creation, deliveryType (inside_dhaka/outside_dhaka) → shipping charge from ShippingZone | ⬜ Not Started |
-| 4 | Payment method select: cod / bkash / nagad / card (manual ref entry first) | ⬜ Not Started |
-| 5 | Place order → Order + OrderItems + OrderAddress + Payment + CouponHistoryLog + statusHistory in one transaction | ⬜ Not Started |
-| 6 | Order confirmation page + order detail/history page | ⬜ Not Started |
-| 7 | Cancel order (if pending), request return (within window) → OrderReturn + items + media | ⬜ Not Started |
+| 1 | Cart (guest via session → merge on login), CartItem add/update/remove | ✅ Complete |
+| 2 | Coupon apply: validate (min order, limits, dates, per-user), discount preview, CouponHistoryLog write on order | ✅ Complete |
+| 3 | Checkout: address selection/creation, deliveryType (inside_dhaka/outside_dhaka) → shipping charge from ShippingZone | ✅ Complete |
+| 4 | Payment method select: cod / bkash / nagad / card (manual ref entry first) | ✅ Complete |
+| 5 | Place order → Order + OrderItems + OrderAddress + Payment + CouponHistoryLog + statusHistory in one transaction | ✅ Complete |
+| 6 | Order confirmation page + order detail/history page | ✅ Complete |
+| 7 | Cancel order (if pending), request return (within window) → OrderReturn + items + media | ✅ Complete |
+
+**Phase 10 notes:**
+- Cart (`src/cart/`): guests are identified by an `x-cart-session` header; the signed-in cart is
+  keyed by userId. Prices, stock and totals are always recomputed server-side from the SKU (a
+  client-supplied SKU id is validated; no variant means "cheapest in-stock active SKU"), and
+  quantities clamp to live stock. `POST user/cart/merge` folds a guest cart into the customer's on
+  login, summing per product+SKU.
+- Coupon: `GET user/coupon/:code/preview` (public) validates active flag, start/end window, minimum
+  order, global usage limit and per-customer limit (from the coupon history), then computes the
+  discount (percent capped by `maxDiscountAmount`, flat capped by the subtotal). Previews never
+  consume a use; `usedCount` only moves inside the order transaction.
+- Checkout: `POST user/checkout/preview` and `POST user/order` re-price the cart, validate stock,
+  resolve the address (saved id owned by the caller, or inline) and the ShippingZone charge, then
+  write Order + OrderItems + OrderAddress + Payment + CouponHistoryLog + the first status-history row
+  in ONE transaction with a guarded stock decrement (`UPDATE … WHERE quantity >= n`). The cart is
+  emptied only after the transaction commits.
+- Returns: a return can be requested only on a delivered order, within 7 days of the delivered
+  status row, and only while no other return is open; per-item quantities are checked against what
+  was ordered minus what was already returned. Photos upload through
+  `POST user/order/return/upload-image` (feature-wise file handling, `order-return` folder).
+- Guard change: `@Public()` routes now attach the user when a valid token is present (optional
+  auth), so guests and signed-in customers can share one endpoint (guest cart vs own cart,
+  per-customer coupon limits). Invalid tokens simply fall back to guest.
+- Web: server-backed cart (guest snapshot in localStorage, handed over to the API on login),
+  cart drawer with live totals + savings, `/checkout` (saved or inline address, delivery, coupon,
+  payment method + reference, server-computed totals) → `/checkout/success`, and the panel's
+  Orders list + detail with timeline, cancel and return-request (item quantities + photos).
+- Verified in the browser on :3011 (guest add → login merge → coupon apply → place order → cancel
+  and return flows) plus unit 168/168, e2e 29/29, Postman audit 176/176.
 
 ## Phase 11 — Public API Endpoints (NestJS)
 

@@ -2,21 +2,36 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Trash2, ShoppingBag, AlertCircle } from 'lucide-react';
 import { useCart } from '@/lib/cart';
 import { useLocale } from '@/lib/locale';
+import { useUserAuth } from '@/lib/user-auth';
 import { mediaUrl, formatTaka } from '@/lib/media-url';
 import { QtyStepper } from './QtyStepper';
 
 /**
  * Slide-over mini cart shown from the header / bottom-nav cart button.
- * Local cart today — checkout connects in the ordering phase.
+ * Totals come from the server once signed in (guests see their local cart),
+ * and checkout hands over to /checkout.
  */
 export function CartDrawer() {
-  const { lines, drawerOpen, closeDrawer, setQty, remove, subtotal, count } =
-    useCart();
+  const {
+    lines,
+    drawerOpen,
+    closeDrawer,
+    setQty,
+    remove,
+    subtotal,
+    savings,
+    count,
+    busy,
+    error,
+    clearError,
+  } = useCart();
   const { t } = useLocale();
+  const { status } = useUserAuth();
   const pathname = usePathname();
+  const authed = status === 'authed';
 
   return (
     <>
@@ -54,6 +69,16 @@ export function CartDrawer() {
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
+          {error && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              <AlertCircle size={14} className="mt-px shrink-0" />
+              <span className="flex-1">{error}</span>
+              <button onClick={clearError} aria-label="Dismiss">
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           {lines.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-3xl">
@@ -74,7 +99,7 @@ export function CartDrawer() {
               </Link>
             </div>
           ) : (
-            <ul className="space-y-4">
+            <ul className={`space-y-4 ${busy ? 'opacity-60' : ''}`}>
               {lines.map((line) => (
                 <li
                   key={line.key}
@@ -120,13 +145,26 @@ export function CartDrawer() {
                         {line.skuLabel}
                       </span>
                     )}
+                    {line.maxQuantity === 0 && (
+                      <span className="mt-0.5 text-xs font-semibold text-destructive">
+                        {t('Out of stock')}
+                      </span>
+                    )}
                     <div className="mt-auto flex items-center justify-between pt-2">
                       <QtyStepper
                         value={line.qty}
+                        max={Math.max(1, line.maxQuantity || 99)}
                         onChange={(q) => setQty(line.key, q)}
                       />
-                      <span className="text-sm font-bold text-primary">
-                        {formatTaka(line.unitPrice * line.qty)}
+                      <span className="text-right">
+                        {savings > 0 && line.listPrice > line.unitPrice && (
+                          <span className="mr-1.5 text-xs text-muted-foreground line-through">
+                            {formatTaka(line.listPrice * line.qty)}
+                          </span>
+                        )}
+                        <span className="text-sm font-bold text-primary">
+                          {formatTaka(line.unitPrice * line.qty)}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -138,6 +176,12 @@ export function CartDrawer() {
 
         {lines.length > 0 && (
           <footer className="border-t border-border px-4 py-4">
+            {savings > 0 && (
+              <div className="mb-1.5 flex items-center justify-between text-xs text-badge-red-foreground">
+                <span>{t('You save')}</span>
+                <span className="font-bold">{formatTaka(savings)}</span>
+              </div>
+            )}
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 {t('Subtotal')} ({count} {t('items')})
@@ -146,21 +190,14 @@ export function CartDrawer() {
                 {formatTaka(subtotal)}
               </span>
             </div>
-            {pathname !== '/user/login' ? (
+            {pathname !== '/checkout' && (
               <Link
-                href="/user/login"
+                href={authed ? '/checkout' : '/user/login?next=/checkout'}
                 onClick={closeDrawer}
                 className="block w-full rounded-full bg-primary py-3 text-center text-sm font-semibold text-primary-foreground transition hover:opacity-90"
               >
-                {t('Proceed to checkout')}
+                {authed ? t('Proceed to checkout') : t('Sign in to checkout')}
               </Link>
-            ) : (
-              <button
-                disabled
-                className="w-full cursor-not-allowed rounded-full bg-muted py-3 text-center text-sm font-semibold text-muted-foreground"
-              >
-                {t('Checkout opens in a later phase')}
-              </button>
             )}
             <p className="mt-2 text-center text-xs text-muted-foreground">
               {t('Shipping calculated at checkout.')}
