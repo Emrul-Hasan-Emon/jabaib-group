@@ -47,7 +47,7 @@
 | 5 | Roles/permissions guard for AdminUser (super_admin, admin, editor) | ✅ Completed |
 | 6 | Global exception filter + standard error shape | ✅ Completed |
 | 7 | ValidationPipe (class-validator) + DTO conventions | ✅ Completed |
-| 8 | Request logging interceptor + tracker fields population (createdBy/updaterName) | ⬜ Not Started |
+| 8 | Request logging interceptor + tracker fields population (createdBy/updaterName) | ✅ Completed |
 | 9 | File upload module (FileModule + FileHandleService, local disk storage, upload/delete endpoints) | ✅ Completed |
 | 10 | Pagination helper: page-size + cursor params and result shapers | ✅ Completed |
 | 11 | Health check endpoint (`GET /` public) | ✅ Completed |
@@ -257,25 +257,86 @@ site layout. Backend: 161 live routes all covered by Postman; unit 100/100, e2e 
 
 ## Phase 11 — Public API Endpoints (NestJS)
 
+> #1-7 were already built incrementally in Phases 8-10 (table below previously stale — the
+> controllers exist and are live; see those phases' notes for detail). #8 (payment callbacks)
+> added in this pass.
+
 | # | Step | Status |
 |---|------|--------|
-| 1 | AuthController (register/login/refresh/social) | ⬜ Not Started |
-| 2 | PublicProductController (list/search/detail by slug) | ⬜ Not Started |
-| 3 | PublicCategoryController (tree), BannerController, HomepageSectionController, PageSettingsController, LanguageController | ⬜ Not Started |
-| 4 | CartController (guest session + authed), WishlistController, ReviewController (create) | ⬜ Not Started |
-| 5 | CheckoutController (quote shipping, apply coupon, place order) | ⬜ Not Started |
-| 6 | OrderController (my orders list/detail/cancel/return) | ⬜ Not Started |
-| 7 | AddressController (my addresses CRUD), UserController (profile) | ⬜ Not Started |
-| 8 | Payment callback endpoints (bkash/nagad/card) | ⬜ Not Started |
+| 1 | AuthController (register/login/refresh/social) | ✅ Completed — `src/auth/controllers/user-auth.controller.ts` |
+| 2 | PublicProductController (list/search/detail by slug) | ✅ Completed — `src/catalog/user/controllers/user-product.controller.ts` |
+| 3 | PublicCategoryController (tree), BannerController, HomepageSectionController, PageSettingsController, LanguageController | ✅ Completed — `catalog/user/controllers/user-category.controller.ts`, `marketing/banner/controllers/user-banner.controller.ts`, `marketing/homepage/controllers/user-homepage-section.controller.ts`, `settings/controllers/user-location.controller.ts` |
+| 4 | CartController (guest session + authed), WishlistController, ReviewController (create) | ✅ Completed — `cart/controllers/user-cart.controller.ts`, `moderation/wishlist/controllers/user-wishlist.controller.ts`, `moderation/review/controllers/user-review.controller.ts` |
+| 5 | CheckoutController (quote shipping, apply coupon, place order) | ✅ Completed — `orders/user/controllers/user-checkout.controller.ts` |
+| 6 | OrderController (my orders list/detail/cancel/return) | ✅ Completed — `orders/user/controllers/user-order.controller.ts` |
+| 7 | AddressController (my addresses CRUD), UserController (profile) | ✅ Completed — `customers/user/controllers/user-address.controller.ts`, `src/auth/controllers/user-auth.controller.ts` (profile) |
+| 8 | Payment callback endpoints (bkash/nagad/card) | ✅ Completed — `orders/controllers/payment-callback.controller.ts`: `POST /v1/payment/callback/:provider` (public, HMAC-signed via `PAYMENT_CALLBACK_SECRET`), updates `Payment` + `Order.paymentStatus`, idempotent on already-paid orders. Postman: `Jabaib-Orders` → "Payment Callbacks" folder, audit 177/177. |
 
 ## Phase 12 — Integration, QA & Launch Prep
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Full user flow e2e: register → browse → cart → coupon → checkout COD → admin confirms → delivered → review | ⬜ Not Started |
-| 2 | Admin flow e2e: manage catalog → process order → approve return | ⬜ Not Started |
-| 3 | SEO: product slug pages, metadata EN/BN, sitemap | ⬜ Not Started |
-| 4 | Performance: image optimization, pagination limits, DB indexes review | ⬜ Not Started |
-| 5 | Backup/restore runbook for Postgres | ⬜ Not Started |
-| 6 | Deployment: server (PM2/Docker), web (Vercel/Node), env separation (dev/staging/prod) | ⬜ Not Started |
-| 7 | Final review of statuses in this file; mark Skipped items with reasons | ⬜ Not Started |
+| 1 | Full user flow e2e: register → browse → cart → coupon → checkout COD → admin confirms → delivered → review | ✅ Completed — `test/launch-flow.e2e-spec.ts` |
+| 2 | Admin flow e2e: manage catalog → process order → approve return | ✅ Completed — same spec, "admin manages catalog" + "admin processes the order and the return" blocks |
+| 3 | SEO: product slug pages, metadata EN/BN, sitemap | ✅ Completed — `web/src/app/sitemap.ts` (static routes + every category + every published product, paginated), `web/src/app/robots.ts` (disallow `/admin`, `/user`, `/checkout`), `generateMetadata` on `product/[slug]/page.tsx` (title/description/canonical/OG from the product). Verified live: `/sitemap.xml`, `/robots.txt`, product page `<title>`/OG tags. Bilingual note: locale is a client-side toggle (`localStorage`, no `/bn/...` routes — see `web/src/lib/locale.tsx`), so there is no second crawlable URL to hreflang-alternate to; metadata is English (the product's primary/default language) rather than faking BN alternates. Fixed an unrelated pre-existing build-breaker found along the way: `/checkout/success` used `useSearchParams()` without a Suspense boundary, failing `next build` outright (confirmed via `git stash -u` on a clean tree) — split into a server `page.tsx` + `CheckoutSuccessContent` client component wrapped in `<Suspense>`. |
+| 4 | Performance: image optimization, pagination limits, DB indexes review | ✅ Completed — audited via a dedicated review pass; fixed what the audit found, scoped to real launch-blockers rather than a blanket rewrite (see notes) |
+| 5 | Backup/restore runbook for Postgres | ✅ Completed — `BACKUP_RESTORE.md` (`pg_dump`/`pg_restore`, uploads dir, PITR note, quarterly restore-drill cadence) |
+| 6 | Deployment: server (PM2/Docker), web (Vercel/Node), env separation (dev/staging/prod) | ✅ Completed — `DEPLOYMENT.md`, `server/Dockerfile` + `.dockerignore`, `server/ecosystem.config.js` (PM2) |
+| 7 | Final review of statuses in this file; mark Skipped items with reasons | ✅ Completed — see notes below |
+
+**Phase 12 notes:**
+- **e2e (#1, #2)**: `test/launch-flow.e2e-spec.ts` chains the whole journey in one spawned
+  server/dataset rather than per-phase isolation: admin creates category + attribute + product
+  + SKU through the real admin API → customer registers, browses (list/slug/detail), carts,
+  previews + applies a flat coupon, checks out COD → admin confirms/processing/shipped/delivered
+  (writes status history) and records the COD payment → customer requests a return, admin
+  approves it → customer submits a review (auto-linked to the delivered order) → admin approves
+  it → it appears on the public product page as `verified: true`. 9/9 passing; full suite
+  (5 files/38 tests) green. One pre-existing harness flake was seen (`admin-flow` occasionally
+  gets `socket hang up` / `ECONNREFUSED` when all 5 e2e files spawn their own server back-to-back
+  in one `--runInBand` run) — confirmed unrelated to this work (reproduces on a clean run, passes
+  on retry; each file boots its own `node dist/main.js` on a free port, so it's resource/timing
+  contention in the harness, not app logic).
+- **SEO (#3)**: see the row above. The Suspense-boundary fix for `/checkout/success` was a real
+  pre-existing `next build` breaker (verified via `git stash -u` on a clean tree) — without it,
+  no production build of `web/` was possible at all, so it blocked this phase regardless of SEO.
+- **Performance (#4)**: ran a dedicated grep/read audit across image usage, pagination, and
+  indexes (not guesswork). Findings and disposition:
+  - *Images*: zero use of `next/image` anywhere in `web/src` prior to this pass, and
+    `next.config.ts` had no `images` config — `next/image` couldn't even be adopted incrementally
+    since the API's upload origin wasn't allow-listed. Fixed: `remotePatterns` added (reads
+    `NEXT_PUBLIC_API_URL`), plus `dangerouslyAllowLocalIP` gated to dev (Next 16's SSRF guard
+    otherwise refuses `localhost`, which only applies to local dev — a real `NEXT_PUBLIC_API_URL`
+    in staging/prod is never `localhost`). Converted the two highest-impact LCP images —
+    `BannerHero` (homepage hero) and `ProductCard` (every product grid, site-wide) — to
+    `<Image fill>` with `sizes`/`priority`. Verified live: pattern-matching + local-IP fetch both
+    confirmed working end-to-end (request reached the upstream fetch stage); the one remaining
+    404 traced to missing seed image files on disk, a pre-existing data gap, not a code defect.
+    Left the PDP gallery (pinch-zoom/pan JS) and ~12 admin-panel thumbnail previews as plain
+    `<img>` — real regression risk (gallery) or low payoff (internal-only admin tool) for this
+    pass; not launch-blocking.
+  - *Pagination*: no unbounded list endpoint found on any user-facing high-growth table (Product,
+    Order, Review, OrderReturn, CouponHistoryLog, etc.) — all go through `findAndCount` +
+    `getPaginateData`, are scoped by a parent id, or carry an explicit `take` cap. `Category.tree()`
+    returns the full tree unbounded, but that's inherent to building a tree UI and category counts
+    stay small for a single-vendor store — not a fix-worthy finding.
+  - *DB indexes*: added `@Index()` to `CartItem.cartId`/`productSKUId`/`productId` (hot lookup
+    path, had none) and `Order.paymentStatus` (filtered by admin order list, sibling columns
+    `status`/`deliveryType` already indexed but this one wasn't) — migration
+    `1791360272789-CartOrderIndexes`. Everything else audited (`OrderItem`, `Review`, `Wishlist`,
+    `ProductSKU`, `ProductMedia`, `Product`, `OrderStatusHistory`, `OrderReturn`,
+    `CouponHistoryLog` FK columns) was already covered. Generating the migration also surfaced
+    unrelated pre-existing schema drift (the `product.collectionId` FK/index name in the DB
+    doesn't match what the entities now generate — cosmetic leftover from the Phase 5
+    Product-Label→Collection rename) — left untouched and flagged separately rather than folded
+    into this migration.
+- **Backup/restore (#5) & deployment (#6)**: written from how this repo actually runs (real env
+  var names, real npm scripts, real migration workflow) rather than generic boilerplate — see the
+  two files directly.
+- **Final review (#7)**: every phase in this file is now ✅ except intentionally-scoped
+  deferrals, called out inline rather than marked ⏭ Skipped as a blanket label:
+  the PDP gallery and admin-panel thumbnails staying on plain `<img>` (#4, risk/payoff), bilingual
+  SEO being English-only given the client-side-only locale toggle (#3), and the
+  `product.collectionId` naming-drift cleanup (#4, spun off as a separate follow-up task). No
+  phase item was skipped for being too hard — everything gated for a later pass has a concrete,
+  stated reason above.
