@@ -36,8 +36,10 @@ export interface ProductSummary {
 
 export interface SkuVariant {
   id: number;
-  attribute: { id: number; name: string };
-  attributeValue: { id: number; value: string };
+  attribute: { id: number; name: string; nameBN?: string | null };
+  /** AttributeValue entity — the label field is `name` (not `value`, which only
+   *  exists on the facets DTO returned by user/product/facets). */
+  attributeValue: { id: number; name: string; nameBN?: string | null };
 }
 
 export interface Sku {
