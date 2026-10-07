@@ -59,7 +59,7 @@ export default function HomeContent() {
   return (
     <div className="bg-background">
       {loading ? (
-        <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="mx-auto max-w-6xl px-4 py-5 sm:py-10">
           <div className="mb-2 h-10 w-64 animate-pulse rounded bg-muted" />
           <div className="h-[420px] animate-pulse rounded-xl bg-muted sm:h-[480px]" />
           <div className="mt-12">
@@ -204,8 +204,8 @@ function NewsletterBlock() {
   };
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8">
-      <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))] px-5 py-8 text-center sm:px-12">
+    <section className="mx-auto max-w-6xl px-4 py-5 sm:py-8">
+      <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))] px-5 py-5 text-center sm:px-12 sm:py-8">
         <Sparkles className="mx-auto mb-2 text-primary" size={24} />
         <h2 className="text-xl font-extrabold text-foreground sm:text-2xl">
           {t('Be first in line')}
