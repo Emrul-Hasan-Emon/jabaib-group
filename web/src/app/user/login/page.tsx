@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserAuth } from '@/lib/user-auth';
+import { nextPath } from '@/lib/next-path';
 import { AuthShell, SocialLoginButtons } from '@/components/user/AuthShell';
 
 export default function UserLoginPage() {
@@ -20,7 +21,7 @@ export default function UserLoginPage() {
     setError(null);
     try {
       await login(emailOrPhone, password);
-      router.replace('/user/dashboard');
+      router.replace(nextPath());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
