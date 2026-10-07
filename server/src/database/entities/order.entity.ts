@@ -83,6 +83,7 @@ export class Order extends BaseEntity {
   paymentMethod: string; // PaymentMethod enum values: 'cod' or 'online'
 
   @Column({ type: 'varchar', length: 20, default: PaymentStatus.PENDING })
+  @Index()
   paymentStatus: string;
 
   @Column({ type: 'text', nullable: true })
