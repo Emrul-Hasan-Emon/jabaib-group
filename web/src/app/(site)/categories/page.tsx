@@ -37,10 +37,10 @@ export default function CategoriesPage() {
   const total = useMemo(() => countNodes(tree), [tree]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
-      <header className="mb-6 flex items-end justify-between gap-3">
+    <div className="mx-auto max-w-6xl px-4 py-3 sm:py-8">
+      <header className="mb-3 flex items-end justify-between gap-3 sm:mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground sm:text-3xl">
+          <h1 className="text-xl font-extrabold text-foreground sm:text-3xl">
             {t('Browse categories')}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -60,10 +60,10 @@ export default function CategoriesPage() {
       </header>
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
-              <div className="aspect-[16/9] rounded-lg bg-muted" />
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-3 sm:p-4">
+              <div className="aspect-square rounded-lg bg-muted sm:aspect-[16/9]" />
               <div className="mt-3 h-4 w-1/2 rounded bg-muted" />
               <div className="mt-2 h-3 w-1/3 rounded bg-muted" />
             </div>
@@ -78,7 +78,7 @@ export default function CategoriesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
           {tree.map((cat) => (
             <CategoryCard key={cat.id} cat={cat} />
           ))}
@@ -103,9 +103,9 @@ function CategoryCard({ cat }: { cat: CategoryNode }) {
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary/40">
       <Link
         href={`/shop?categoryId=${cat.id}`}
-        className="group flex items-center gap-3 p-3 sm:p-4"
+        className="group flex flex-col items-start gap-2 p-2.5 text-left sm:flex-row sm:items-center sm:gap-3 sm:p-4"
       >
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-accent text-lg font-extrabold text-accent-foreground sm:h-16 sm:w-16">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-accent text-base font-extrabold text-accent-foreground sm:h-16 sm:w-16 sm:text-lg">
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image} alt={t(cat.name, cat.nameBN)} className="h-full w-full object-cover" />
@@ -114,10 +114,10 @@ function CategoryCard({ cat }: { cat: CategoryNode }) {
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-bold text-foreground sm:text-base">
+          <span className="block truncate text-[13px] font-bold text-foreground sm:text-base">
             {t(cat.name, cat.nameBN)}
           </span>
-          <span className="mt-0.5 block text-xs text-muted-foreground">
+          <span className="mt-0.5 block text-[11px] text-muted-foreground">
             {subtreeCount} {t('products')}
           </span>
         </span>
@@ -125,7 +125,7 @@ function CategoryCard({ cat }: { cat: CategoryNode }) {
       </Link>
 
       {visibleChildren.length > 0 && (
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto border-t border-border px-3 py-2.5 sm:px-4">
+        <div className="no-scrollbar flex gap-1.5 overflow-x-auto border-t border-border px-2.5 py-2 sm:px-4 sm:py-2.5">
           {visibleChildren.map((child) => (
             <Link
               key={child.id}
