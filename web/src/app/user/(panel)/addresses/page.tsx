@@ -137,7 +137,7 @@ export default function UserAddressesPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-6 sm:gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-foreground">{t('My addresses')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -159,13 +159,13 @@ export default function UserAddressesPage() {
       )}
 
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
           {[0, 1].map((i) => (
             <div key={i} className="h-40 animate-pulse rounded-2xl border border-border bg-card" />
           ))}
         </div>
       ) : addresses.length === 0 && !showForm ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-10 text-center sm:py-16">
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
             <MapPin size={22} className="text-muted-foreground" />
           </div>
