@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ILike } from 'typeorm';
 import { DatabaseService } from '../../../database/database.service';
 import { JwtPayload } from '../../../auth/jwt/jwt-payload';
 import {
@@ -14,23 +13,40 @@ import { CreateAttributeDto } from '../dtos/create-attribute.dto';
 import { UpdateAttributeDto } from '../dtos/update-attribute.dto';
 import { CreateAttributeValueDto } from '../dtos/create-attribute-value.dto';
 import { UpdateAttributeValueDto } from '../dtos/update-attribute-value.dto';
-import { creatorFields, slugify, updaterFields } from '../../utils/catalog.utils';
+import {
+  creatorFields,
+  slugify,
+  updaterFields,
+} from '../../utils/catalog.utils';
 
 @Injectable()
 export class AdminAttributeService {
   constructor(private readonly database: DatabaseService) {}
 
   async list(pagination: Pagination, query: Record<string, string>) {
-    const where: Record<string, unknown> = {};
-    if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
-    if (query.q) where.name = ILike(`%${query.q}%`);
-    const [data, count] = await this.database.attribute.findAndCount({
-      where,
-      relations: { values: true },
-      order: { id: 'ASC' },
-      skip: pagination.offset,
-      take: pagination.size,
-    });
+    const qb = this.database.attribute
+      .createQueryBuilder('attribute')
+      .leftJoinAndSelect('attribute.values', 'values')
+      .orderBy('attribute.id', 'ASC')
+      .addOrderBy('values.sortOrder', 'ASC')
+      .skip(pagination.offset)
+      .take(pagination.size);
+
+    if (query.isActive !== undefined) {
+      qb.andWhere('attribute.isActive = :isActive', {
+        isActive: query.isActive === 'true',
+      });
+    }
+    if (query.q) {
+      qb.andWhere('attribute.name ILIKE :q', { q: `%${query.q}%` });
+    }
+    if (query.valueName) {
+      qb.andWhere('values.name ILIKE :valueName', {
+        valueName: `%${query.valueName}%`,
+      });
+    }
+
+    const [data, count] = await qb.getManyAndCount();
     return getPaginateData(data, count, pagination);
   }
 
@@ -43,20 +59,46 @@ export class AdminAttributeService {
     return attribute;
   }
 
-  create(dto: CreateAttributeDto, user?: JwtPayload) {
-    return this.database.attribute.save(
+  async create(dto: CreateAttributeDto, user?: JwtPayload) {
+    const { values, ...rest } = dto;
+    const attribute = await this.database.attribute.save(
       this.database.attribute.create({
-        ...dto,
+        ...rest,
         slug: dto.slug ?? slugify(dto.name),
         ...creatorFields(user),
       }),
     );
+    if (values?.length) {
+      for (const v of values) {
+        await this.database.attributeValue.save(
+          this.database.attributeValue.create({
+            ...v,
+            attributeId: attribute.id,
+            ...creatorFields(user),
+          }),
+        );
+      }
+    }
+    return this.findOne(attribute.id);
   }
 
   async update(id: number, dto: UpdateAttributeDto, user?: JwtPayload) {
     const attribute = await this.findOne(id);
-    Object.assign(attribute, dto, updaterFields(user));
-    return this.database.attribute.save(attribute);
+    const { values, ...rest } = dto;
+    Object.assign(attribute, rest, updaterFields(user));
+    await this.database.attribute.save(attribute);
+    if (values?.length) {
+      for (const v of values) {
+        await this.database.attributeValue.save(
+          this.database.attributeValue.create({
+            ...v,
+            attributeId: attribute.id,
+            ...creatorFields(user),
+          }),
+        );
+      }
+    }
+    return this.findOne(id);
   }
 
   async remove(id: number) {

@@ -11,12 +11,15 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateSkuDto, UpdateSkuDto, SkuVariantPairDto } from '../dtos/sku.dto';
 import { creatorFields, updaterFields } from '../../utils/catalog.utils';
+import { FileHandleService } from '../../../file/services/file-handle.service';
+import { UPLOAD_FOLDERS } from '../../../file/upload-folders';
 
 @Injectable()
 export class AdminSkuService {
   constructor(
     private readonly database: DatabaseService,
     @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly fileHandle: FileHandleService,
   ) {}
 
   listByProduct(productId: number) {
@@ -50,11 +53,7 @@ export class AdminSkuService {
 
     const sku = await this.dataSource.transaction(async (manager) => {
       if (dto.isDefault) {
-        await manager.update(
-          ProductSKU,
-          { productId },
-          { isDefault: false },
-        );
+        await manager.update(ProductSKU, { productId }, { isDefault: false });
       }
       const {
         variants: variantPairs,
@@ -94,21 +93,15 @@ export class AdminSkuService {
   async update(id: number, dto: UpdateSkuDto, user?: JwtPayload) {
     const existing = await this.findOne(id);
 
-    if (dto.variants) await this.validateVariants(dto.variants);
     const price = dto.price ?? existing.price;
-    const discounted = dto.discountedPrice ?? existing.discountedPrice;
-    this.validateDiscount({
-      price,
-      discountedPrice: discounted,
-      discountedPriceStartDate:
-        dto.discountedPriceStartDate !== undefined
-          ? (dto.discountedPriceStartDate ?? undefined)
-          : existing.discountedPriceStartDate?.toISOString(),
-      discountedPriceEndDate:
-        dto.discountedPriceEndDate !== undefined
-          ? (dto.discountedPriceEndDate ?? undefined)
-          : existing.discountedPriceEndDate?.toISOString(),
-    });
+    const discounted =
+      dto.discountedPrice !== undefined
+        ? dto.discountedPrice
+        : existing.discountedPrice;
+    this.validateDiscount({ price, discountedPrice: discounted });
+
+    const previousImagePath = existing.imagePath;
+    const nextImagePath = dto.imagePath ?? existing.imagePath;
 
     await this.dataSource.transaction(async (manager) => {
       if (dto.isDefault) {
@@ -118,41 +111,53 @@ export class AdminSkuService {
           { isDefault: false },
         );
       }
-      const { variants, discountedPriceStartDate, discountedPriceEndDate, ...rest } = dto;
-      Object.assign(existing, rest, updaterFields(user));
-      if (dto.discountedPriceStartDate !== undefined) {
-        existing.discountedPriceStartDate = discountedPriceStartDate
-          ? new Date(discountedPriceStartDate)
-          : (null as unknown as Date);
-      }
-      if (dto.discountedPriceEndDate !== undefined) {
-        existing.discountedPriceEndDate = discountedPriceEndDate
-          ? new Date(discountedPriceEndDate)
-          : (null as unknown as Date);
-      }
-      await manager.save(existing);
-
-      if (variants) {
-        await manager.delete(ProductSKUVariant, { productSKUId: id });
-        for (const pair of variants) {
-          await manager.save(
-            manager.create(ProductSKUVariant, {
-              productSKUId: id,
-              attributeId: pair.attributeId,
-              attributeValueId: pair.attributeValueId,
-              ...creatorFields(user),
-            }),
-          );
-        }
-      }
+      // Only the editable fields — variants/code/stock are immutable after creation.
+      // Using manager.update (not save of the loaded entity) so the relation is
+      // never re-derived into the FK column.
+      const patch: Partial<ProductSKU> = {};
+      if (dto.price !== undefined) patch.price = dto.price;
+      if (dto.discountedPrice !== undefined)
+        patch.discountedPrice = dto.discountedPrice;
+      if (dto.isActive !== undefined) patch.isActive = dto.isActive;
+      if (dto.isDefault !== undefined) patch.isDefault = dto.isDefault;
+      if (dto.imageUrl !== undefined) patch.imageUrl = dto.imageUrl;
+      if (dto.imagePath !== undefined) patch.imagePath = dto.imagePath;
+      await manager.update(
+        ProductSKU,
+        { id },
+        { ...patch, ...updaterFields(user) },
+      );
     });
+
+    // Replace/clear: drop the superseded SKU image file after the update.
+    if (
+      previousImagePath &&
+      nextImagePath !== previousImagePath &&
+      this.fileHandle.belongsTo(UPLOAD_FOLDERS.productSku, previousImagePath)
+    ) {
+      this.fileHandle.removeIfExists(previousImagePath);
+    }
     return this.findOne(id);
   }
 
-  async remove(id: number) {
+  /** Feature-owned upload for the SKU image (product/sku folder). */
+  uploadImage(file: Express.Multer.File) {
+    return this.fileHandle.uploadFile(file, UPLOAD_FOLDERS.productSku);
+  }
+
+  /** Feature-owned removal: deletes the physical file and clears image fields. */
+  async removeImage(id: number, user?: JwtPayload) {
     const sku = await this.findOne(id);
-    await this.database.productSKU.softRemove(sku);
-    return { deleted: true };
+    const previousImagePath = sku.imagePath;
+    await this.dataSource.transaction(async (manager) => {
+      await manager.update(
+        ProductSKU,
+        { id },
+        { imageUrl: '', imagePath: '', ...updaterFields(user) },
+      );
+    });
+    if (previousImagePath) this.fileHandle.removeIfExists(previousImagePath);
+    return this.findOne(id);
   }
 
   private async validateVariants(variants: SkuVariantPairDto[]) {
@@ -193,9 +198,7 @@ export class AdminSkuService {
       dto.discountedPrice !== null &&
       dto.discountedPrice > dto.price
     ) {
-      throw new BadRequestException(
-        'discountedPrice cannot exceed price',
-      );
+      throw new BadRequestException('discountedPrice cannot exceed price');
     }
     if (dto.discountedPriceStartDate && dto.discountedPriceEndDate) {
       if (

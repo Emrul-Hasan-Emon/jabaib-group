@@ -10,15 +10,58 @@ import { AdminUser } from '../entities/admin-user.entity';
 import { DeliveryType } from '../enums/enums';
 import { AdminUserRoleEnum } from '../enums/user-type.enum';
 
-const DIVISIONS: Array<{ name: string; nameBN: string; districts: Array<{ name: string; nameBN: string }> }> = [
-  { name: 'Dhaka', nameBN: 'ঢাকা', districts: [{ name: 'Dhaka', nameBN: 'ঢাকা' }, { name: 'Gazipur', nameBN: 'গাজীপুর' }, { name: 'Narayanganj', nameBN: 'নারায়ণগঞ্জ' }] },
-  { name: 'Chattogram', nameBN: 'চট্টগ্রাম', districts: [{ name: 'Chattogram', nameBN: 'চট্টগ্রাম' }, { name: 'Cox\'s Bazar', nameBN: 'কক্সবাজার' }] },
-  { name: 'Rajshahi', nameBN: 'রাজশাহী', districts: [{ name: 'Rajshahi', nameBN: 'রাজশাহী' }] },
-  { name: 'Khulna', nameBN: 'খুলনা', districts: [{ name: 'Khulna', nameBN: 'খুলনা' }] },
-  { name: 'Barisal', nameBN: 'বরিশাল', districts: [{ name: 'Barisal', nameBN: 'বরিশাল' }] },
-  { name: 'Sylhet', nameBN: 'সিলেট', districts: [{ name: 'Sylhet', nameBN: 'সিলেট' }] },
-  { name: 'Rangpur', nameBN: 'রংপুর', districts: [{ name: 'Rangpur', nameBN: 'রংপুর' }] },
-  { name: 'Mymensingh', nameBN: 'ময়মনসিংহ', districts: [{ name: 'Mymensingh', nameBN: 'ময়মনসিংহ' }] },
+const DIVISIONS: Array<{
+  name: string;
+  nameBN: string;
+  districts: Array<{ name: string; nameBN: string }>;
+}> = [
+  {
+    name: 'Dhaka',
+    nameBN: 'ঢাকা',
+    districts: [
+      { name: 'Dhaka', nameBN: 'ঢাকা' },
+      { name: 'Gazipur', nameBN: 'গাজীপুর' },
+      { name: 'Narayanganj', nameBN: 'নারায়ণগঞ্জ' },
+    ],
+  },
+  {
+    name: 'Chattogram',
+    nameBN: 'চট্টগ্রাম',
+    districts: [
+      { name: 'Chattogram', nameBN: 'চট্টগ্রাম' },
+      { name: "Cox's Bazar", nameBN: 'কক্সবাজার' },
+    ],
+  },
+  {
+    name: 'Rajshahi',
+    nameBN: 'রাজশাহী',
+    districts: [{ name: 'Rajshahi', nameBN: 'রাজশাহী' }],
+  },
+  {
+    name: 'Khulna',
+    nameBN: 'খুলনা',
+    districts: [{ name: 'Khulna', nameBN: 'খুলনা' }],
+  },
+  {
+    name: 'Barisal',
+    nameBN: 'বরিশাল',
+    districts: [{ name: 'Barisal', nameBN: 'বরিশাল' }],
+  },
+  {
+    name: 'Sylhet',
+    nameBN: 'সিলেট',
+    districts: [{ name: 'Sylhet', nameBN: 'সিলেট' }],
+  },
+  {
+    name: 'Rangpur',
+    nameBN: 'রংপুর',
+    districts: [{ name: 'Rangpur', nameBN: 'রংপুর' }],
+  },
+  {
+    name: 'Mymensingh',
+    nameBN: 'ময়মনসিংহ',
+    districts: [{ name: 'Mymensingh', nameBN: 'ময়মনসিংহ' }],
+  },
 ];
 
 function slugify(value: string): string {
@@ -34,7 +77,9 @@ async function seed() {
   await qr.startTransaction();
   try {
     // Country
-    let country = await qr.manager.findOne(Country, { where: { slug: 'bangladesh' } });
+    let country = await qr.manager.findOne(Country, {
+      where: { slug: 'bangladesh' },
+    });
     if (!country) {
       country = await qr.manager.save(Country, {
         name: 'Bangladesh',
@@ -79,12 +124,27 @@ async function seed() {
 
     // Shipping zones
     const zones = [
-      { name: 'Inside Dhaka', nameBN: 'ঢাকার ভিতরে', code: DeliveryType.INSIDE_DHAKA, charge: 60, estimatedDays: 2 },
-      { name: 'Outside Dhaka', nameBN: 'ঢাকার বাইরে', code: DeliveryType.OUTSIDE_DHAKA, charge: 120, estimatedDays: 5 },
+      {
+        name: 'Inside Dhaka',
+        nameBN: 'ঢাকার ভিতরে',
+        code: DeliveryType.INSIDE_DHAKA,
+        charge: 60,
+        estimatedDays: 2,
+      },
+      {
+        name: 'Outside Dhaka',
+        nameBN: 'ঢাকার বাইরে',
+        code: DeliveryType.OUTSIDE_DHAKA,
+        charge: 120,
+        estimatedDays: 5,
+      },
     ];
     for (const zone of zones) {
-      const exists = await qr.manager.findOne(ShippingZone, { where: { code: zone.code } });
-      if (!exists) await qr.manager.save(ShippingZone, { ...zone, isActive: true });
+      const exists = await qr.manager.findOne(ShippingZone, {
+        where: { code: zone.code },
+      });
+      if (!exists)
+        await qr.manager.save(ShippingZone, { ...zone, isActive: true });
     }
 
     // Languages
@@ -93,7 +153,9 @@ async function seed() {
       { name: 'বাংলা', code: 'bn', isDefault: false },
     ];
     for (const lang of languages) {
-      const exists = await qr.manager.findOne(Language, { where: { code: lang.code } });
+      const exists = await qr.manager.findOne(Language, {
+        where: { code: lang.code },
+      });
       if (!exists) await qr.manager.save(Language, { ...lang, isActive: true });
     }
 

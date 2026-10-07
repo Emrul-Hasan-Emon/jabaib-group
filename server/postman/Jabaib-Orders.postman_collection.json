@@ -1,0 +1,458 @@
+{
+  "info": {
+    "name": "Jabaib API — Orders",
+    "_postman_id": "jabaib-orders-collection",
+    "description": "Orders + returns. List/detail with status transitions, payment recording, notes, and returns.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": ""
+    },
+    {
+      "key": "userAccessToken",
+      "value": ""
+    },
+    {
+      "key": "userRefreshToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (sets adminAccessToken)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/auth/login",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@jabaib.com\",\n  \"password\": \"Admin@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('adminAccessToken', res.accessToken);",
+                  "pm.collectionVariables.set('adminRefreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "User login (sets userAccessToken)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/auth/login",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailOrPhone\": \"customer@example.com\",\n  \"password\": \"Secret@123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('userAccessToken', res.accessToken);",
+                  "pm.collectionVariables.set('userRefreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List (filters: status, paymentStatus, paymentMethod, q, customerName, mobile, divisionId, districtId, date range)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order?page=0&size=10&status=&paymentStatus=&paymentMethod=&q=&customerName=&mobile=&divisionId=&districtId=&startDate=&endDate=",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "paymentStatus",
+                  "value": ""
+                },
+                {
+                  "key": "paymentMethod",
+                  "value": ""
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "customerName",
+                  "value": ""
+                },
+                {
+                  "key": "mobile",
+                  "value": ""
+                },
+                {
+                  "key": "divisionId",
+                  "value": ""
+                },
+                {
+                  "key": "districtId",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Divisions → districts (filter dropdowns)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order/meta/locations",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order",
+                "meta",
+                "locations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update status (writes history)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order/1/status",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order",
+                "1",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\",\n  \"note\": \"Confirmed by phone\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add note",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order/1/note",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order",
+                "1",
+                "note"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Customer requested delivery after 6pm\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Record payment (COD received)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order/1/payment",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order",
+                "1",
+                "payment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"\",\n  \"amount\": 2100\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Returns",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order-return?page=0&size=10",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order-return"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order-return/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order-return",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update status (requested → approved/… → refunded)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order-return/1/status",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order-return",
+                "1",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"Item received in good condition\",\n  \"refundAmount\": 1390,\n  \"refundMethod\": \"bkash\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

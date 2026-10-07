@@ -6,7 +6,7 @@ import { decimalTransformer } from './decimal.transformer';
 @Entity()
 export class Coupon extends BaseEntity {
   @Column({ unique: true })
-  code: string; 
+  code: string;
 
   @Column({ type: 'varchar', length: 20 })
   type: string; // CouponType enum values: 'flat' or 'percent'

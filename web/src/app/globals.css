@@ -96,3 +96,34 @@ body {
   color: hsl(var(--foreground));
   font-family: 'Inter', system-ui, sans-serif;
 }
+
+/* ---------- storefront utilities ---------- */
+
+/* hide horizontal scrollbars on touch rails / carousels */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* auth form inputs (login / register) */
+.auth-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  padding: 0.65rem 0.9rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.auth-input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.35);
+}
+.auth-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.7);
+}

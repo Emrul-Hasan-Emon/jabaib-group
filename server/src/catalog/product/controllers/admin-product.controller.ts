@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -7,13 +8,20 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
+  UploadedFile,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
   ApiProperty,
   ApiPropertyOptional,
-  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsInt } from 'class-validator';
@@ -24,6 +32,7 @@ import { UpdateProductDto } from '../dtos/update-product.dto';
 import {
   CreateProductMediaDto,
   UpdateProductMediaDto,
+  ReorderProductMediaDto,
 } from '../dtos/product-media.dto';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
@@ -59,7 +68,8 @@ export class AdminProductController {
 
   @Get()
   @ApiOperation({
-    summary: 'List products (q, categoryId, productLabelId, isPublished/isFeatured/isActive, sort=name|createdAt:asc|desc)',
+    summary:
+      'List products (q, categoryId, collectionId, isPublished/isFeatured/isActive, sort=name|createdAt:asc|desc)',
   })
   list(
     @PaginationParams() pagination: Pagination,
@@ -75,9 +85,84 @@ export class AdminProductController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create a product (then upload thumbnail/media via /file/upload)' })
+  @ApiOperation({
+    summary:
+      'Create a product (then upload thumbnail/media via the product upload endpoints)',
+  })
   create(@Body() dto: CreateProductDto, @CurrentUser() user: JwtPayload) {
     return this.service.create(dto, user);
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary:
+      'Upload a product thumbnail — saves it in the product folder and returns { url, path } to set via product update.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  uploadImage(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('file is required');
+    return this.service.uploadImage(file);
+  }
+
+  @Post('media/upload-many')
+  @UseInterceptors(FilesInterceptor('files', 20))
+  @ApiOperation({
+    summary:
+      'Upload several media files at once — saves each in the product/media folder and returns { url, path } per file for POST /v1/admin/product/:id/media.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          maxItems: 20,
+        },
+      },
+    },
+  })
+  uploadMediaMany(@UploadedFiles() files?: Express.Multer.File[]) {
+    if (!files?.length) throw new BadRequestException('files are required');
+    return this.service.uploadMediaMany(files);
+  }
+
+  @Post('media/upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary:
+      'Upload a media gallery image/video — saves it in the product/media folder and returns { url, path } for POST /v1/admin/product/:id/media.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  uploadMediaImage(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('file is required');
+    return this.service.uploadMedia(file);
+  }
+
+  @Delete(':id/image')
+  @ApiOperation({
+    summary:
+      'Remove the product thumbnail — deletes the physical file and clears thumbnailUrl/thumbnailPath.',
+  })
+  removeImage(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.removeImage(id, user);
   }
 
   @Patch(':id')
@@ -127,6 +212,18 @@ export class AdminProductController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.updateMedia(id, mediaId, dto, user);
+  }
+
+  @Put(':id/media/reorder')
+  @ApiOperation({
+    summary:
+      'Reorder the media gallery — body is the full list of media ids in desired display order (every item exactly once); sortOrder is derived from position.',
+  })
+  reorderMedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ReorderProductMediaDto,
+  ) {
+    return this.service.reorderMedia(id, dto.order);
   }
 
   @Delete(':id/media/:mediaId')

@@ -16,19 +16,28 @@ import {
   CreateProductMediaDto,
   UpdateProductMediaDto,
 } from '../dtos/product-media.dto';
-import { creatorFields, slugify, updaterFields } from '../../utils/catalog.utils';
+import {
+  creatorFields,
+  slugify,
+  updaterFields,
+} from '../../utils/catalog.utils';
+import { FileHandleService } from '../../../file/services/file-handle.service';
+import { UPLOAD_FOLDERS } from '../../../file/upload-folders';
 
 const SORTABLE = new Set(['name', 'createdAt', 'updatedAt', 'id']);
 
 @Injectable()
 export class AdminProductService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly fileHandle: FileHandleService,
+  ) {}
 
   async list(pagination: Pagination, query: Record<string, string>) {
     const where: Record<string, unknown> = {};
     if (query.q) where.name = ILike(`%${query.q}%`);
     if (query.categoryId) where.categoryId = Number(query.categoryId);
-    if (query.productLabelId) where.productLabelId = Number(query.productLabelId);
+    if (query.collectionId) where.collectionId = Number(query.collectionId);
     for (const flag of ['isPublished', 'isFeatured', 'isActive'] as const) {
       if (query[flag] !== undefined) where[flag] = query[flag] === 'true';
     }
@@ -40,7 +49,7 @@ export class AdminProductService {
 
     const [data, count] = await this.database.product.findAndCount({
       where,
-      relations: { category: true, productLabel: true },
+      relations: { category: true, collection: true },
       order,
       skip: pagination.offset,
       take: pagination.size,
@@ -53,7 +62,7 @@ export class AdminProductService {
       where: { id },
       relations: {
         category: true,
-        productLabel: true,
+        collection: true,
         media: true,
         skus: { skuVariants: { attribute: true, attributeValue: true } },
       },
@@ -84,8 +93,53 @@ export class AdminProductService {
       });
       if (!category) throw new BadRequestException('Category not found');
     }
+    const previousThumbnailPath = product.thumbnailPath;
     Object.assign(product, dto, updaterFields(user));
-    return this.database.product.save(product);
+    const saved = await this.database.product.save(product);
+    // Replace/clear: drop the superseded thumbnail file now that the DB is saved.
+    if (
+      previousThumbnailPath &&
+      saved.thumbnailPath !== previousThumbnailPath &&
+      this.fileHandle.belongsTo(UPLOAD_FOLDERS.product, previousThumbnailPath)
+    ) {
+      this.fileHandle.removeIfExists(previousThumbnailPath);
+    }
+    return saved;
+  }
+
+  /** Feature-owned upload for the product thumbnail. */
+  uploadImage(file: Express.Multer.File) {
+    return this.fileHandle.uploadFile(file, UPLOAD_FOLDERS.product);
+  }
+
+  /** Feature-owned removal of the thumbnail: deletes the file and clears fields. */
+  async removeImage(id: number, user?: JwtPayload) {
+    const product = await this.findOne(id);
+    const previousThumbnailPath = product.thumbnailPath;
+    Object.assign(
+      product,
+      { thumbnailUrl: '', thumbnailPath: '' },
+      updaterFields(user),
+    );
+    const saved = await this.database.product.save(product);
+    if (previousThumbnailPath) {
+      this.fileHandle.removeIfExists(previousThumbnailPath);
+    }
+    return saved;
+  }
+
+  /** Feature-owned upload for a media gallery item (product/media folder). */
+  uploadMedia(file: Express.Multer.File) {
+    return this.fileHandle.uploadFile(file, UPLOAD_FOLDERS.productMedia);
+  }
+
+  /**
+   * Feature-owned BATCH upload for the media gallery: uploads several files
+   * in one request to the product/media folder and returns their url/path
+   * entries (one per file).
+   */
+  uploadMediaMany(files: Express.Multer.File[]) {
+    return this.fileHandle.uploadFiles(files, UPLOAD_FOLDERS.productMedia);
   }
 
   async remove(id: number) {
@@ -152,8 +206,18 @@ export class AdminProductService {
         { isPrimary: false },
       );
     }
+    const previousPath = media.path;
     Object.assign(media, dto, updaterFields(user));
-    return this.database.productMedia.save(media);
+    const saved = await this.database.productMedia.save(media);
+    // Replacing the media file: delete the superseded one after saving.
+    if (
+      previousPath &&
+      saved.path !== previousPath &&
+      this.fileHandle.belongsTo(UPLOAD_FOLDERS.productMedia, previousPath)
+    ) {
+      this.fileHandle.removeIfExists(previousPath);
+    }
+    return saved;
   }
 
   async removeMedia(productId: number, mediaId: number) {
@@ -161,7 +225,46 @@ export class AdminProductService {
       where: { id: mediaId, productId },
     });
     if (!media) throw new NotFoundException('Media not found');
+    if (media.path) this.fileHandle.removeIfExists(media.path);
     await this.database.productMedia.softRemove(media);
     return { deleted: true };
+  }
+
+  /**
+   * Bulk reorder of the media gallery. `order` must be the FULL list of the
+   * product's media ids (every item exactly once); sortOrder = position.
+   */
+  async reorderMedia(productId: number, order: number[]) {
+    await this.findOne(productId);
+    const rows = await this.database.productMedia.find({
+      where: { productId },
+    });
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const seen = new Set<number>();
+    for (const mediaId of order) {
+      const row = byId.get(mediaId);
+      if (!row) {
+        throw new BadRequestException(
+          `Media ${mediaId} does not belong to this product`,
+        );
+      }
+      if (seen.has(mediaId)) {
+        throw new BadRequestException(
+          `Duplicate media id in order: ${mediaId}`,
+        );
+      }
+      seen.add(mediaId);
+    }
+    if (seen.size !== rows.length) {
+      throw new BadRequestException(
+        'order must contain every media item of the product exactly once',
+      );
+    }
+    await this.database.productMedia.save(
+      order.map((mediaId, index) =>
+        Object.assign(byId.get(mediaId)!, { sortOrder: index }),
+      ),
+    );
+    return this.listMedia(productId);
   }
 }

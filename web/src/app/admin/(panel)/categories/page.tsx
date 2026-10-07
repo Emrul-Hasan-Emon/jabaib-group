@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { DetailsModal } from '@/components/admin/DetailsModal';
+import { flattenCategoryTree, type CategoryTree, type FlatCategory } from '@/lib/category-tree';
 
 interface Category {
   id: number;
@@ -25,16 +26,33 @@ export default function CategoriesPage() {
   const [rows, setRows] = useState<Category[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<Category | null>(null);
+  const [q, setQ] = useState('');
+  const [isActive, setIsActive] = useState('');
+  const [parentId, setParentId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const res = await api.get<{ data: Category[] }>('/v1/admin/category?page=0&size=100');
-    setRows(res.data);
+  const filters = useCallback(async () => {
+    const nodes = await api.get<CategoryTree[]>('/v1/admin/category/tree');
+    return flattenCategoryTree(nodes);
   }, [api]);
+
+  const load = useCallback(async () => {
+    const params = new URLSearchParams({ page: '0', size: '100' });
+    if (q) params.set('q', q);
+    if (isActive) params.set('isActive', isActive);
+    if (parentId) params.set('parentId', parentId);
+    const res = await api.get<{ data: Category[] }>(`/v1/admin/category?${params}`);
+    setRows(res.data);
+  }, [api, q, isActive, parentId]);
 
   useEffect(() => {
     load().catch((e) => setError(e.message));
   }, [load]);
+
+  const [parentOptions, setParentOptions] = useState<FlatCategory[]>([]);
+  useEffect(() => {
+    filters().then(setParentOptions).catch(() => {});
+  }, [filters]);
 
   const remove = async () => {
     if (!deleteTarget) return;
@@ -56,6 +74,22 @@ export default function CategoriesPage() {
         </Link>
       </div>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        <input placeholder="Search by name…" className="rounded-md border border-input px-3 py-2 text-sm" value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className="rounded-md border border-input px-3 py-2 text-sm" value={isActive} onChange={(e) => setIsActive(e.target.value)}>
+          <option value="">All active states</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+        <select className="rounded-md border border-input px-3 py-2 text-sm" value={parentId} onChange={(e) => setParentId(e.target.value)}>
+          <option value="">All parents</option>
+          <option value="null">Root only</option>
+          {parentOptions.map((c) => (
+            <option key={c.id} value={c.id}>{c.parentName ? `${c.parentName} / ` : ''}{c.name}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full text-sm">

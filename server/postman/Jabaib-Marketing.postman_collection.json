@@ -1,0 +1,667 @@
+{
+  "info": {
+    "name": "Jabaib API — Marketing — Coupons, Banners, Homepage Sections",
+    "_postman_id": "jabaib-phase5-marketing",
+    "description": "Phase 5 — Marketing. Coupons CRUD + usage audit, banners, homepage sections.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (sets token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/auth/login",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@jabaib.com\",\n  \"password\": \"Admin@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('adminAccessToken', res.accessToken);",
+                  "pm.collectionVariables.set('adminRefreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "item": [
+        {
+          "name": "List (filters: code, type, isActive, startDate, endDate — dates filter by eligibility window)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon?page=0&size=10&code=&type=&isActive=&startDate=&endDate=",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "code",
+                  "value": ""
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SUMMER10\",\n  \"type\": \"percent\",\n  \"amount\": 10,\n  \"minOrderAmount\": 1500,\n  \"maxDiscountAmount\": 300,\n  \"usageLimit\": 500,\n  \"perUserLimit\": 1,\n  \"startsAt\": null,\n  \"endsAt\": null,\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Update (incl. per-user limit & validity)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perUserLimit\": 2,\n  \"endsAt\": \"2026-12-31T23:59:59.000Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coupon History",
+      "item": [
+        {
+          "name": "Usage audit (filters: couponCode, customerName, mobile, orderNumber, startDate, endDate)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon-history?page=0&size=10&couponCode=&customerName=&mobile=&orderNumber=&startDate=&endDate=",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon-history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "couponCode",
+                  "value": ""
+                },
+                {
+                  "key": "customerName",
+                  "value": ""
+                },
+                {
+                  "key": "mobile",
+                  "value": ""
+                },
+                {
+                  "key": "orderNumber",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "History for one coupon",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/coupon/1/history",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "coupon",
+                "1",
+                "history"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banners",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/banner?page=0&size=10",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "banner"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/banner/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "banner",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/banner",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "banner"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/banner/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "banner",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/banner/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "banner",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Homepage Sections",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/homepage-section?page=0&size=10",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "homepage-section"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/homepage-section/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "homepage-section",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/homepage-section",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "homepage-section"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/homepage-section/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "homepage-section",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/homepage-section/:id",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "homepage-section",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

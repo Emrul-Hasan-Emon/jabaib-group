@@ -8,14 +8,16 @@ import {
   Package,
   ShoppingCart,
   Users,
-  Image as ImageIcon,
-  TicketPercent,
+  Megaphone,
   Settings,
+  MessageSquare,
+  Heart,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useSidebar } from './SidebarContext';
+import { useAdminAuth } from '@/lib/admin-auth';
 
 interface NavItem {
   icon: React.ElementType;
@@ -35,14 +37,17 @@ const NAV: NavItem[] = [
       { label: 'Category', path: '/admin/categories', id: 'category' },
       { label: 'Attribute', path: '/admin/attributes', id: 'attribute' },
       { label: 'Product', path: '/admin/products', id: 'product' },
-      { label: 'Label', path: '/admin/labels', id: 'label' },
+      { label: 'Collection', path: '/admin/collections', id: 'collection' },
     ],
   },
   {
     icon: ShoppingCart,
     label: 'Orders',
     id: 'orders',
-    submenu: [{ label: 'Order List', path: '/admin/orders', id: 'order-list' }],
+    submenu: [
+        { label: 'Order List', path: '/admin/orders', id: 'order-list' },
+        { label: 'Returns', path: '/admin/returns', id: 'returns' },
+      ],
   },
   {
     icon: Users,
@@ -50,15 +55,49 @@ const NAV: NavItem[] = [
     id: 'customers',
     submenu: [{ label: 'Customer List', path: '/admin/customers', id: 'customer-list' }],
   },
-  { icon: TicketPercent, label: 'Coupons', path: '/admin/coupons', id: 'coupons' },
-  { icon: ImageIcon, label: 'Banners', path: '/admin/banners', id: 'banners' },
-  { icon: Settings, label: 'Settings', path: '/admin/settings', id: 'settings' },
+  {
+    icon: Megaphone,
+    label: 'Marketing',
+    id: 'marketing',
+    submenu: [
+      { label: 'Coupons', path: '/admin/coupons', id: 'coupons' },
+      { label: 'Coupon History', path: '/admin/coupon-history', id: 'coupon-history' },
+      { label: 'Banners', path: '/admin/banners', id: 'banners' },
+      { label: 'Homepage Sections', path: '/admin/homepage-sections', id: 'homepage-sections' },
+    ],
+  },
+  { icon: MessageSquare, label: 'Reviews', path: '/admin/reviews', id: 'reviews' },
+  { icon: Heart, label: 'Wishlists', path: '/admin/wishlists', id: 'wishlists' },
+  {
+    icon: Settings,
+    label: 'Settings',
+    id: 'settings',
+    submenu: [
+      { label: 'Page Settings', path: '/admin/page-settings', id: 'page-settings' },
+      { label: 'Shipping Zones', path: '/admin/shipping-zones', id: 'shipping-zones' },
+      { label: 'System Settings', path: '/admin/system-settings', id: 'system-settings' },
+      { label: 'Languages', path: '/admin/languages', id: 'languages' },
+      { label: 'Locations', path: '/admin/locations', id: 'locations' },
+      { label: 'Admin Users', path: '/admin/admin-users', id: 'admin-users' },
+    ],
+  },
 ];
 
 export function AdminSidebar() {
   const { isExpanded, toggle, mobileOpen, setMobileOpen } = useSidebar();
+  const { admin } = useAdminAuth();
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  const isSuperAdmin = admin?.role === 'super_admin';
+  const navItems = NAV.map((item) =>
+    item.id === 'settings' && !isSuperAdmin
+      ? {
+          ...item,
+          submenu: item.submenu?.filter((s) => s.id !== 'admin-users'),
+        }
+      : item,
+  );
 
   const toggleMenu = (id: string) =>
     setOpenMenus((m) => ({ ...m, [id]: !m[id] }));
@@ -93,7 +132,7 @@ export function AdminSidebar() {
       </div>
 
       <nav className="flex flex-col gap-1 overflow-y-auto p-3">
-        {NAV.map((item) => {
+        {navItems.map((item) => {
           const open = openMenus[item.id];
           const active =
             isActive(item.path) ||

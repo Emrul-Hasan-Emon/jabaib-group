@@ -13,7 +13,8 @@ import { JwtManagerService } from './jwt-manager.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_DURATION') ?? '1d') as SignOptions['expiresIn'],
+          expiresIn: (configService.get<string>('JWT_DURATION') ??
+            '1d') as SignOptions['expiresIn'],
           algorithm: 'HS512',
         },
       }),

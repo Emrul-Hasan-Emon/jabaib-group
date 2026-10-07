@@ -45,7 +45,7 @@ export class CreateProductDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  productLabelId?: number;
+  collectionId?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

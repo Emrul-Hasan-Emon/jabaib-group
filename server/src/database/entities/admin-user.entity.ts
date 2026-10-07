@@ -20,4 +20,12 @@ export class AdminUser extends BaseEntity {
   @Column({ default: true })
   @Index()
   isActive: boolean;
+
+  /** Profile / avatar image served from the upload API. */
+  @Column({ type: 'varchar', length: 250, nullable: true })
+  imageUrl?: string | null;
+
+  /** Storage path of the uploaded image (for cleanup / re-uploads). */
+  @Column({ type: 'varchar', length: 250, nullable: true })
+  imagePath?: string | null;
 }

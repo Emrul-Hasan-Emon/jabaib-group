@@ -7,18 +7,11 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuthService, LoginDetails } from '../services/auth.service';
-import {
-  AdminLoginDto,
-  LogoutDto,
-  RefreshTokenDto,
-} from '../dto/login.dto';
+import { AdminLoginDto, LogoutDto, RefreshTokenDto } from '../dto/login.dto';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import type { JwtPayload } from '../jwt/jwt-payload';
@@ -38,17 +31,27 @@ export class AdminAuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Admin login with email + password' })
   adminLogin(@Body() dto: AdminLoginDto, @Req() req: Request) {
-    return this.authService.adminLogin(dto.email, dto.password, this.loginDetailsFrom(req));
+    return this.authService.adminLogin(
+      dto.email,
+      dto.password,
+      this.loginDetailsFrom(req),
+    );
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Rotate an admin refresh token for a new token pair' })
+  @ApiOperation({
+    summary: 'Rotate an admin refresh token for a new token pair',
+  })
   adminRefresh(@Body() dto: RefreshTokenDto, @Req() req: Request) {
-    return this.authService.refresh(dto.refreshToken, this.loginDetailsFrom(req));
+    return this.authService.refresh(
+      dto.refreshToken,
+      this.loginDetailsFrom(req),
+    );
   }
 
   @Public()

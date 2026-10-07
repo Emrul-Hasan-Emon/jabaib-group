@@ -13,7 +13,7 @@ import { Product } from './product.entity';
 import { ProductMedia } from './product-media.entity';
 import { ProductSKU } from './product-sku.entity';
 import { ProductSKUVariant } from './product-sku-variant.entity';
-import { ProductLabel } from './product-label.entity';
+import { Collection } from './collection.entity';
 import { Wishlist } from './wishlist.entity';
 import { Review } from './review.entity';
 import { Cart } from './cart.entity';
@@ -52,7 +52,7 @@ export { Product } from './product.entity';
 export { ProductMedia } from './product-media.entity';
 export { ProductSKU } from './product-sku.entity';
 export { ProductSKUVariant } from './product-sku-variant.entity';
-export { ProductLabel } from './product-label.entity';
+export { Collection } from './collection.entity';
 export { Wishlist } from './wishlist.entity';
 export { Review } from './review.entity';
 export { Cart } from './cart.entity';
@@ -91,7 +91,7 @@ export const ENTITIES = [
   ProductMedia,
   ProductSKU,
   ProductSKUVariant,
-  ProductLabel,
+  Collection,
   Wishlist,
   Review,
   Cart,

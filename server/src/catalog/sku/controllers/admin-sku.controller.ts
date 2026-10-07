@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -7,9 +8,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -58,19 +64,46 @@ export class AdminSkuController {
     return this.service.findOne(id);
   }
 
+  @Post('sku/upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary:
+      'Upload a SKU image — saves it in the product/sku folder and returns { url, path } to set via SKU update.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  uploadImage(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('file is required');
+    return this.service.uploadImage(file);
+  }
+
+  @Delete('sku/:id/image')
+  @ApiOperation({
+    summary:
+      'Remove the SKU image — deletes the physical file and clears imageUrl/imagePath.',
+  })
+  removeImage(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.removeImage(id, user);
+  }
+
   @Patch('sku/:id')
-  @ApiOperation({ summary: 'Update a SKU (pass variants array to replace pairs)' })
+  @ApiOperation({
+    summary:
+      'Update a SKU — only price, discountedPrice, isActive and isDefault are editable.',
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateSkuDto,
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.update(id, dto, user);
-  }
-
-  @Delete('sku/:id')
-  @ApiOperation({ summary: 'Soft-delete a SKU' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.service.remove(id);
   }
 }

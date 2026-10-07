@@ -1,9 +1,16 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Category } from './category.entity';
 import { ProductSKU } from './product-sku.entity';
 import { ProductMedia } from './product-media.entity';
-import { ProductLabel } from './product-label.entity';
+import { Collection } from './collection.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -22,7 +29,7 @@ export class Product extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   descriptionBN: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   @Index()
   categoryId: number;
 
@@ -38,14 +45,14 @@ export class Product extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   thumbnailPath: string;
 
-  /** Badge shown on the product, e.g. "New", "Sale", "Hot". */
+  /** Collection badge shown on the product, e.g. "New", "Sale", "Hot". */
   @Column({ type: 'int', nullable: true })
   @Index()
-  productLabelId: number;
+  collectionId: number;
 
-  @ManyToOne(() => ProductLabel, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'productLabelId' })
-  productLabel: ProductLabel | null;
+  @ManyToOne(() => Collection, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'collectionId' })
+  collection: Collection | null;
 
   @Column({ default: false })
   @Index()

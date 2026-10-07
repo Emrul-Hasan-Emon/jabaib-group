@@ -12,7 +12,7 @@ export class ShippingZone extends BaseEntity {
   @Column({ type: 'varchar', length: 250, nullable: true })
   nameBN: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   code: DeliveryType;
 
   @Column({

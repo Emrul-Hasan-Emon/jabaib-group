@@ -122,54 +122,12 @@ export class CreateSkuDto {
   variants: SkuVariantPairDto[];
 }
 
+/**
+ * After creation only price/discountedPrice/isActive/isDefault and the
+ * image fields may be changed. Attribute/value pairs and the SKU code
+ * itself are immutable.
+ */
 export class UpdateSkuDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @Matches(/^[A-Za-z0-9\-_]+$/)
-  sku?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  quantity?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  lowStockThreshold?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  descriptionBN?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  imagePath?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  myBuyingPrice?: number;
-
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
@@ -186,29 +144,22 @@ export class UpdateSkuDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsDateString()
-  discountedPriceStartDate?: string | null;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsDateString()
-  discountedPriceEndDate?: string | null;
+  @IsBoolean()
+  isActive?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean;
 
+  /** Replaces the SKU image — pass a new url/path (from SKU upload) to swap + delete the old file. */
   @ApiPropertyOptional()
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsString()
+  imageUrl?: string;
 
-  @ApiPropertyOptional({ type: [SkuVariantPairDto] })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
-  @Type(() => SkuVariantPairDto)
-  variants?: SkuVariantPairDto[];
+  @IsString()
+  imagePath?: string;
 }

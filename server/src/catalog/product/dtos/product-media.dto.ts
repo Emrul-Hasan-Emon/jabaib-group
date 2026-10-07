@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
@@ -11,7 +13,9 @@ import { Type } from 'class-transformer';
 import { MediaType } from '../../../database/enums/enums';
 
 export class CreateProductMediaDto {
-  @ApiProperty({ description: 'URL returned by POST /file/upload' })
+  @ApiProperty({
+    description: 'URL returned by POST /v1/admin/product/media/upload-image',
+  })
   @IsString()
   url: string;
 
@@ -49,6 +53,17 @@ export class CreateProductMediaDto {
 }
 
 export class UpdateProductMediaDto {
+  /** Replaces the media file — pass a new url/path (from media upload) to swap + delete the old one. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  url?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  path?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -75,4 +90,17 @@ export class UpdateProductMediaDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+}
+
+/**
+ * Media gallery reorder contract: the FULL ordered list of media ids for the
+ * product (every existing item exactly once). sortOrder = position in the list.
+ */
+export class ReorderProductMediaDto {
+  @ApiProperty({ type: [Number], example: [3, 1, 2] })
+  @Type(() => Number)
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  order: number[];
 }
