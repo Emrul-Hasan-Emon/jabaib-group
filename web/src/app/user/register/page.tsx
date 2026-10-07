@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserAuth } from '@/lib/user-auth';
+import { nextPath } from '@/lib/next-path';
 import { AuthShell, SocialLoginButtons } from '@/components/user/AuthShell';
 
 export default function UserRegisterPage() {
@@ -27,7 +28,7 @@ export default function UserRegisterPage() {
         phone: form.phone || undefined,
         password: form.password,
       });
-      router.replace('/user/dashboard');
+      router.replace(nextPath());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
