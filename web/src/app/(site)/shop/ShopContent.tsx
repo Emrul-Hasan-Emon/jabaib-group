@@ -169,9 +169,9 @@ export function ShopContent({
   const activeCat = flatCategories.find((c) => c.id === query.categoryId);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-3 sm:py-8">
       {/* heading */}
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2 sm:mb-5 sm:gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-foreground sm:text-3xl">
             {query.q
@@ -187,7 +187,7 @@ export function ShopContent({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters((v) => !v)}
-            className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground lg:hidden"
+            className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[13px] font-medium text-foreground sm:text-sm lg:hidden"
           >
             <SlidersHorizontal size={15} /> {t('Filters')}
           </button>
@@ -195,7 +195,7 @@ export function ShopContent({
             <select
               value={query.sort ?? 'newest'}
               onChange={(e) => apply({ sort: e.target.value as ProductSort })}
-              className="appearance-none rounded-full border border-border bg-card py-2 pl-3.5 pr-8 text-sm font-medium outline-none focus:border-ring"
+              className="appearance-none rounded-full border border-border bg-card py-1.5 pl-3 pr-8 text-[13px] font-medium outline-none focus:border-ring sm:py-2 sm:text-sm"
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -212,7 +212,7 @@ export function ShopContent({
 
       {/* active filter chips */}
       {(query.categoryId || query.collectionId || query.isFeatured || selectedValues.size > 0) && (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-2.5 flex flex-wrap gap-1.5 sm:mb-4 sm:gap-2">
           {query.categoryId && activeCat && (
             <Chip onClear={() => apply({ categoryId: undefined })}>
               {t(activeCat.name, activeCat.nameBN)}
@@ -244,7 +244,7 @@ export function ShopContent({
             <FilterGroup title={t('Category')}>
               <button
                 onClick={() => apply({ categoryId: undefined })}
-                className={`block w-full rounded-md px-2 py-1.5 text-left text-sm ${
+                className={`block w-full rounded-md px-2 py-1.5 text-left text-[13px] sm:text-sm ${
                   !query.categoryId
                     ? 'bg-primary/10 font-semibold text-primary'
                     : 'text-muted-foreground hover:text-foreground'
@@ -328,7 +328,7 @@ export function ShopContent({
           ) : loading ? (
             <ProductGridSkeleton count={8} />
           ) : items.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-10 text-center sm:py-16">
               <div className="text-4xl">🔍</div>
               <p className="font-semibold text-foreground">{t('No products found')}</p>
               <p className="max-w-sm text-sm text-muted-foreground">
@@ -343,7 +343,7 @@ export function ShopContent({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5">
                 {items.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -353,7 +353,7 @@ export function ShopContent({
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="rounded-full border border-border bg-card px-8 py-3 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:opacity-50"
+                    className="rounded-full border border-border bg-card px-6 py-2 text-[13px] font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:opacity-50 sm:px-8 sm:py-3 sm:text-sm"
                   >
                     {loadingMore ? t('Loading…') : t('Load more')}
                   </button>
@@ -368,7 +368,7 @@ export function ShopContent({
       {showFilters && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowFilters(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl bg-card p-5 pb-10">
+          <div className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-2xl bg-card p-4 pb-8 sm:max-h-[80vh] sm:p-5 sm:pb-10">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-base font-bold">
                 <SlidersHorizontal size={16} /> {t('Filters')}
@@ -389,7 +389,7 @@ export function ShopContent({
                     apply({ categoryId: c.id });
                     setShowFilters(false);
                   }}
-                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] sm:px-3 sm:py-2 sm:text-sm ${
                     query.categoryId === c.id
                       ? 'bg-primary/10 font-semibold text-primary'
                       : 'text-foreground'
@@ -433,7 +433,7 @@ export function ShopContent({
                           setShowFilters(false);
                         }}
                         aria-pressed={selected}
-                        className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition ${
+                        className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition sm:py-2 sm:text-sm ${
                           selected
                             ? 'border-primary bg-primary/10 text-primary'
                             : 'border-border text-foreground'
