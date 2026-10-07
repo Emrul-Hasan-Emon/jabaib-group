@@ -86,7 +86,7 @@ export default function UserOrdersPage() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-xl font-extrabold text-foreground">My Orders</h1>
+        <h1 className="text-xl font-extrabold text-foreground">{t('My Orders', 'আমার অর্ডার')}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {orders.length === 0
             ? 'Your placed orders will appear here with live status.'
@@ -95,11 +95,11 @@ export default function UserOrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-6 py-10 text-center sm:py-16">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
             <Package size={24} className="text-muted-foreground" />
           </span>
-          <p className="font-semibold text-foreground">No orders yet</p>
+          <p className="font-semibold text-foreground">{t('No orders yet', 'এখনো কোনো অর্ডার নেই')}</p>
           <p className="text-sm text-muted-foreground">
             {t('Once you place an order it will show up here with live tracking.')}
           </p>
@@ -111,12 +111,12 @@ export default function UserOrdersPage() {
           </Link>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2 sm:space-y-3">
           {orders.map((order) => (
             <li key={order.id}>
               <Link
                 href={`/user/orders/${order.id}`}
-                className="flex items-center gap-3 rounded-xl border border-border bg-white p-4 transition hover:border-primary/40"
+                className="flex items-center gap-2.5 rounded-xl border border-border bg-white p-3 transition hover:border-primary/40 sm:gap-3 sm:p-4"
               >
                 <span className="h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {order.thumbnailUrl ? (

@@ -211,7 +211,7 @@ export default function OrderDetailPage({
         {/* items */}
         <ul className="mt-4 divide-y divide-border">
           {order.items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 py-3">
+            <li key={item.id} className="flex items-center gap-2.5 py-2.5 sm:gap-3 sm:py-3">
               <span className="h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
                 {item.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -278,7 +278,7 @@ export default function OrderDetailPage({
         </div>
 
         {/* address + payment */}
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-2.5 sm:mt-4 sm:gap-3 sm:grid-cols-2">
           <div className="rounded-lg bg-muted/60 p-3 text-sm">
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
               <MapPin size={12} /> {t('Delivery address')}
@@ -323,7 +323,7 @@ export default function OrderDetailPage({
         <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
           <Package size={15} className="text-primary" /> {t('Status history')}
         </h2>
-        <ol className="mt-3 space-y-3">
+        <ol className="mt-2 space-y-2.5 sm:mt-3 sm:space-y-3">
           {order.statusHistory.map((h, i) => (
             <li key={i} className="flex gap-3">
               <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
