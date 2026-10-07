@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Jabaib API — Orders",
+    "name": "Jabaib API \u2014 Orders",
     "_postman_id": "jabaib-orders-collection",
     "description": "Orders + returns. List/detail with status transitions, payment recording, notes, and returns.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -222,7 +222,7 @@
           }
         },
         {
-          "name": "Divisions → districts (filter dropdowns)",
+          "name": "Divisions \u2192 districts (filter dropdowns)",
           "request": {
             "method": "GET",
             "header": [
@@ -420,7 +420,7 @@
           }
         },
         {
-          "name": "Update status (requested → approved/… → refunded)",
+          "name": "Update status (requested \u2192 approved/\u2026 \u2192 refunded)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -449,6 +449,95 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"Item received in good condition\",\n  \"refundAmount\": 1390,\n  \"refundMethod\": \"bkash\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Callbacks",
+      "item": [
+        {
+          "name": "Callback \u2014 bkash",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/bkash",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "bkash"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
+            }
+          }
+        },
+        {
+          "name": "Callback \u2014 nagad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/nagad",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "nagad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
+            }
+          }
+        },
+        {
+          "name": "Callback \u2014 card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/card",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "card"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
             }
           }
         }
