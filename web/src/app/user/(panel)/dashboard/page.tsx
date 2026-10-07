@@ -67,7 +67,7 @@ export default function UserDashboardPage() {
         {t('Keep your details up to date for smooth deliveries.')}
       </p>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-6">
         {/* profile info */}
         <section className="rounded-2xl border border-border bg-card p-6">
           <h2 className="mb-4 font-bold text-foreground">{t('Profile details')}</h2>
