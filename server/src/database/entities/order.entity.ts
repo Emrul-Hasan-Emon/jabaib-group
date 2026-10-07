@@ -1,10 +1,23 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
 import { OrderAddress } from './order-address.entity';
-import { DeliveryType, OrderStatus, PaymentMethod, PaymentStatus } from '../enums/enums';
+import {
+  DeliveryType,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from '../enums/enums';
 import { decimalTransformer } from './decimal.transformer';
 
 @Entity()
