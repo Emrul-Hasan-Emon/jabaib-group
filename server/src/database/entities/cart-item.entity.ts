@@ -8,12 +8,15 @@ import { Product } from './product.entity';
 @Entity()
 export class CartItem extends BaseEntity {
   @Column({ type: 'int' })
+  @Index()
   cartId: number;
 
   @Column({ type: 'int' })
+  @Index()
   productSKUId: number;
 
   @Column({ type: 'int' })
+  @Index()
   productId: number;
 
   @Column({ default: 1 })
