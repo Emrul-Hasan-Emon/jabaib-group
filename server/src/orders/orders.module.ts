@@ -11,6 +11,10 @@ import { UserOrderService } from './user/services/user-order.service';
 import { UserCheckoutService } from './user/services/user-checkout.service';
 import { PaymentCallbackController } from './controllers/payment-callback.controller';
 import { PaymentCallbackService } from './services/payment-callback.service';
+import { AdminPaymentGatewayController } from './controllers/admin-payment-gateway.controller';
+import { AdminPaymentGatewayService } from './services/admin-payment-gateway.service';
+import { UserPaymentGatewayController } from './user/controllers/user-payment-gateway.controller';
+import { UserPaymentGatewayService } from './user/services/user-payment-gateway.service';
 
 @Module({
   imports: [FileModule, MarketingModule],
@@ -20,6 +24,8 @@ import { PaymentCallbackService } from './services/payment-callback.service';
     UserOrderController,
     UserCheckoutController,
     PaymentCallbackController,
+    AdminPaymentGatewayController,
+    UserPaymentGatewayController,
   ],
   providers: [
     AdminOrderService,
@@ -27,6 +33,8 @@ import { PaymentCallbackService } from './services/payment-callback.service';
     UserOrderService,
     UserCheckoutService,
     PaymentCallbackService,
+    AdminPaymentGatewayService,
+    UserPaymentGatewayService,
   ],
 })
 export class OrdersModule {}
