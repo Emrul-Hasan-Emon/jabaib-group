@@ -151,4 +151,55 @@ describe('PaymentCallbackService (gateway callbacks)', () => {
       }),
     );
   });
+
+  it('settles the pending payment from order placement instead of adding a second row', async () => {
+    // Order placement books a `pending` payment carrying the customer's TrxID;
+    // the callback must update that row, not insert a duplicate.
+    const pending = {
+      id: 31,
+      orderId: 6,
+      transactionId: 'TX-4',
+      status: 'pending',
+      amount: 1572,
+      paidAt: null,
+    };
+    db.order.findOne.mockResolvedValue(order({ paymentStatus: 'pending' }));
+    db.payment.findOne.mockResolvedValue(pending);
+
+    await service.handle(PaymentMethod.BKASH, {
+      orderId: 6,
+      transactionId: 'TX-4',
+      status: 'success',
+    });
+
+    expect(db.payment.create).not.toHaveBeenCalled();
+    expect(db.payment.save).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 31, status: 'paid' }),
+    );
+    expect(pending.paidAt).toBeInstanceOf(Date);
+  });
+
+  it('flips a previously failed payment to paid on a later success callback', async () => {
+    const failed = {
+      id: 32,
+      orderId: 6,
+      transactionId: 'TX-5',
+      status: 'failed',
+      amount: 1572,
+      paidAt: null,
+    };
+    db.order.findOne.mockResolvedValue(order({ paymentStatus: 'failed' }));
+    db.payment.findOne.mockResolvedValue(failed);
+
+    await service.handle(PaymentMethod.BKASH, {
+      orderId: 6,
+      transactionId: 'TX-5',
+      status: 'success',
+    });
+
+    expect(db.payment.create).not.toHaveBeenCalled();
+    expect(db.payment.save).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 32, status: 'paid' }),
+    );
+  });
 });
