@@ -138,17 +138,38 @@ export class AdminOrderService {
     if (order.paymentStatus === PaymentStatus.PAID) {
       throw new BadRequestException('Order is already marked paid');
     }
-    const payment = await this.database.payment.save(
-      this.database.payment.create({
-        orderId: id,
-        method: order.paymentMethod,
-        status: PaymentStatus.PAID,
-        amount: dto.amount ?? order.total,
-        transactionId: dto.transactionId,
-        paidAt: new Date(),
-        ...creatorFields(user),
-      }),
-    );
+    // Settle the customer's pending payment when it carries the same reference
+    // (what a manual gateway order always has) instead of stacking a second row
+    // on top of it. A COD payment has no reference, so it still inserts.
+    const pending = dto.transactionId
+      ? await this.database.payment.findOne({
+          where: {
+            orderId: id,
+            transactionId: dto.transactionId,
+            status: PaymentStatus.PENDING as string,
+          },
+        })
+      : null;
+
+    const payment = pending
+      ? await (async () => {
+          pending.status = PaymentStatus.PAID;
+          pending.amount = dto.amount ?? order.total;
+          pending.paidAt = new Date();
+          Object.assign(pending, updaterFields(user));
+          return this.database.payment.save(pending);
+        })()
+      : await this.database.payment.save(
+          this.database.payment.create({
+            orderId: id,
+            method: order.paymentMethod,
+            status: PaymentStatus.PAID,
+            amount: dto.amount ?? order.total,
+            transactionId: dto.transactionId,
+            paidAt: new Date(),
+            ...creatorFields(user),
+          }),
+        );
     order.paymentStatus = PaymentStatus.PAID;
     Object.assign(order, updaterFields(user));
     await this.database.order.save(order);

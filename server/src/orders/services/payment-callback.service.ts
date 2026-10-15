@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { PaymentMethod, PaymentStatus } from '../../database/enums/enums';
+import { Payment } from '../../database/entities/payment.entity';
 import { PaymentCallbackDto } from '../dtos/payment-callback.dto';
 
 /** Payment rows written by a gateway callback are stamped as such. */
@@ -50,19 +51,39 @@ export class PaymentCallbackService {
 
     const status =
       dto.status === 'success' ? PaymentStatus.PAID : PaymentStatus.FAILED;
+    const paidAt = status === PaymentStatus.PAID ? new Date() : undefined;
 
-    const payment = await this.database.payment.save(
-      this.database.payment.create({
-        orderId: dto.orderId,
-        method: provider,
-        status,
-        amount: dto.amount ?? orderTotal,
-        transactionId: dto.transactionId,
-        providerResponse: dto.raw,
-        paidAt: status === PaymentStatus.PAID ? new Date() : undefined,
-        ...CREATOR,
-      }),
-    );
+    // Settle the payment row that already exists for this reference rather than
+    // inserting a second one: order placement books a `pending` payment carrying
+    // the customer's TrxID, so always inserting left a duplicate `pending` row
+    // behind on every online order.
+    const existing = await this.database.payment.findOne({
+      where: { orderId: dto.orderId, transactionId: dto.transactionId },
+    });
+
+    let payment: Payment;
+    if (existing) {
+      existing.status = status;
+      existing.amount = dto.amount ?? orderTotal;
+      if (paidAt ?? existing.paidAt) existing.paidAt = paidAt ?? existing.paidAt;
+      if (dto.raw) existing.providerResponse = dto.raw;
+      existing.updaterType = 'gateway';
+      existing.updaterName = 'payment-callback';
+      payment = await this.database.payment.save(existing);
+    } else {
+      payment = await this.database.payment.save(
+        this.database.payment.create({
+          orderId: dto.orderId,
+          method: provider,
+          status,
+          amount: dto.amount ?? orderTotal,
+          transactionId: dto.transactionId,
+          providerResponse: dto.raw,
+          paidAt,
+          ...CREATOR,
+        }),
+      );
+    }
 
     order.paymentStatus = status;
     await this.database.order.save(order);

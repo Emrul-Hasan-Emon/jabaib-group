@@ -22,7 +22,12 @@ describe('AdminOrderService (status transitions)', () => {
       createQueryBuilder: jest.Mock;
     };
     orderStatusHistory: { create: jest.Mock; save: jest.Mock };
-    payment: { find: jest.Mock; create: jest.Mock; save: jest.Mock };
+    payment: {
+      find: jest.Mock;
+      findOne: jest.Mock;
+      create: jest.Mock;
+      save: jest.Mock;
+    };
   };
 
   beforeEach(async () => {
@@ -38,6 +43,8 @@ describe('AdminOrderService (status transitions)', () => {
       },
       payment: {
         find: jest.fn(() => Promise.resolve([])),
+        // no pending row by default -> recordPayment inserts, as it always did
+        findOne: jest.fn(() => Promise.resolve(null)),
         create: jest.fn((row) => row),
         save: jest.fn((row) => Promise.resolve(row)),
       },
@@ -165,6 +172,28 @@ describe('AdminOrderService (status transitions)', () => {
           updaterName: 'Root Admin',
         }),
       );
+    });
+
+    it('settles the pending payment carrying the same reference instead of adding a row', async () => {
+      // A manual gateway order already has a pending payment holding the
+      // customer's proof; recording it must not leave that row pending forever.
+      const pending = { id: 40, status: 'pending', amount: 1060, paidAt: null };
+      db.order.findOne.mockResolvedValue(
+        orderOf(OrderStatus.PENDING, {
+          paymentStatus: PaymentStatus.PENDING,
+          paymentMethod: 'bkash',
+          total: 1060,
+        }),
+      );
+      db.payment.findOne.mockResolvedValue(pending);
+
+      await service.recordPayment(1, { transactionId: 'TXN9' });
+
+      expect(db.payment.create).not.toHaveBeenCalled();
+      expect(db.payment.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 40, status: 'paid' }),
+      );
+      expect(pending.paidAt).toBeInstanceOf(Date);
     });
 
     it('rejects recording payment on an already-paid order (400)', async () => {
