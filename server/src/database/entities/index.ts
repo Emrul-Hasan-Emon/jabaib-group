@@ -28,6 +28,7 @@ import { OrderReturn } from './order-return.entity';
 import { OrderReturnItem } from './order-return-item.entity';
 import { OrderReturnStatusHistory } from './order-return-status-history.entity';
 import { Payment } from './payment.entity';
+import { PaymentGateway } from './payment-gateway.entity';
 import { ShippingZone } from './shipping-zone.entity';
 import { Banner } from './banner.entity';
 import { HomepageSection } from './homepage-section.entity';
@@ -67,6 +68,7 @@ export { OrderReturn } from './order-return.entity';
 export { OrderReturnItem } from './order-return-item.entity';
 export { OrderReturnStatusHistory } from './order-return-status-history.entity';
 export { Payment } from './payment.entity';
+export { PaymentGateway } from './payment-gateway.entity';
 export { ShippingZone } from './shipping-zone.entity';
 export { Banner } from './banner.entity';
 export { HomepageSection } from './homepage-section.entity';
@@ -106,6 +108,7 @@ export const ENTITIES = [
   OrderReturnItem,
   OrderReturnStatusHistory,
   Payment,
+  PaymentGateway,
   ShippingZone,
   Banner,
   HomepageSection,

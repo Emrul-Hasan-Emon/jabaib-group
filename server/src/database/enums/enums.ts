@@ -15,6 +15,16 @@ export enum PaymentMethod {
   CARD = 'card',
 }
 
+/**
+ * Gateway family. MFS = mobile financial service (bKash/Nagad/send money),
+ * Bank = a bank account transfer. Drives which manual fields the admin must
+ * configure and which details the customer must submit at checkout.
+ */
+export enum PaymentGatewayType {
+  MFS = 'mfs',
+  BANK = 'bank',
+}
+
 export enum PaymentStatus {
   PENDING = 'pending',
   PAID = 'paid',
