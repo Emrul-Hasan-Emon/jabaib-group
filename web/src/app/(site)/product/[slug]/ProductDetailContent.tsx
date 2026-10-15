@@ -117,6 +117,22 @@ export function ProductDetailContent({ slug }: { slug: string }) {
     );
   }, [product, selection]);
 
+  /**
+   * Every option stays clickable as long as some in-stock SKU carries it, so no
+   * size/colour can become unreachable. `pick` re-anchors the other groups when
+   * a choice invalidates them, which is what guarantees the selected
+   * combination always resolves to a real SKU.
+   */
+  const isOptionAvailable = (attributeId: number, valueId: number) =>
+    (product?.skus ?? []).some(
+      (s) =>
+        s.isActive &&
+        s.quantity > 0 &&
+        (s.skuVariants ?? []).some(
+          (v) => v.attribute.id === attributeId && v.attributeValue.id === valueId,
+        ),
+    );
+
   const selectedSku = useMemo(
     () => matchingSkus.find((s) => optionGroups.every((g) => selection[g.attributeId] != null && (s.skuVariants ?? []).some((v) => v.attribute.id === g.attributeId && v.attributeValue.id === selection[g.attributeId]))) ?? matchingSkus[0] ?? null,
     [matchingSkus, selection, optionGroups],
@@ -159,7 +175,44 @@ export function ProductDetailContent({ slug }: { slug: string }) {
   };
 
   const pick = (attrId: number, valueId: number) => {
-    setSelection((prev) => ({ ...prev, [attrId]: valueId }));
+    setSelection((prev) => {
+      const next = { ...prev, [attrId]: valueId };
+      const skus = (product?.skus ?? []).filter(
+        (s) =>
+          s.isActive &&
+          s.quantity > 0 &&
+          Object.entries(next).every(([attr, val]) =>
+            (s.skuVariants ?? []).some(
+              (v) => v.attribute.id === Number(attr) && v.attributeValue.id === val,
+            ),
+          ),
+      );
+      if (skus.length) return next;
+
+      // The new choice rules out what was picked in the other groups (e.g.
+      // Size=L only exists in Navy). Re-anchor those groups to the first
+      // in-stock SKU that carries the new choice, so the cart can never hold a
+      // combination no SKU matches — and no option becomes unreachable.
+      const anchor = (product?.skus ?? []).find(
+        (s) =>
+          s.isActive &&
+          s.quantity > 0 &&
+          (s.skuVariants ?? []).some(
+            (v) => v.attribute.id === attrId && v.attributeValue.id === valueId,
+          ),
+      );
+      if (!anchor) return next;
+
+      const fixed: Record<number, number> = { [attrId]: valueId };
+      for (const g of optionGroups) {
+        if (fixed[g.attributeId] != null) continue;
+        const sv = (anchor.skuVariants ?? []).find(
+          (v) => v.attribute.id === g.attributeId,
+        );
+        if (sv) fixed[g.attributeId] = sv.attributeValue.id;
+      }
+      return fixed;
+    });
   };
 
   const addToBag = () => {
@@ -281,14 +334,7 @@ export function ProductDetailContent({ slug }: { slug: string }) {
                   <div className="flex flex-wrap gap-2">
                     {group.values.map((v) => {
                       const active = selection[group.attributeId] === v.valueId;
-                      const available = (product.skus ?? []).some(
-                        (s) =>
-                          s.isActive &&
-                          s.quantity > 0 &&
-                          (s.skuVariants ?? []).some(
-                            (sv) => sv.attribute.id === group.attributeId && sv.attributeValue.id === v.valueId,
-                          ),
-                      );
+                      const available = isOptionAvailable(group.attributeId, v.valueId);
                       return (
                         <button
                           key={v.valueId}
