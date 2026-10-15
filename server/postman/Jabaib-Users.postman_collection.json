@@ -215,6 +215,70 @@
       ]
     },
     {
+      "name": "Payment Gateways",
+      "item": [
+        {
+          "name": "Active gateways (checkout options)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/payment-gateway",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "payment-gateway"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Checkout preview with a manual gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/checkout/preview",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "checkout",
+                "preview"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"paymentGatewayId\": 1,\n  \"paymentMetaData\": {\n    \"txnId\": \"TXN123456\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Categories",
       "item": [
         {

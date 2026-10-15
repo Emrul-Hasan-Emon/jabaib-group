@@ -122,6 +122,29 @@ const orders = makeCollection(
       { name: 'Add note', request: request({ method: 'PATCH', path: ['admin', 'order', '1', 'note'], body: { note: 'Customer requested delivery after 6pm' } }) },
       { name: 'Record payment (COD received)', request: request({ method: 'POST', path: ['admin', 'order', '1', 'payment'], body: { transactionId: '', amount: 2100 } }) },
     ]),
+    // The gateway callback is PUBLIC (no bearer token) — the provider signs it
+    // with x-callback-signature when PAYMENT_CALLBACK_SECRET is configured.
+    folder('Payment Callbacks', [
+      ...['bkash', 'nagad', 'card'].map((provider) => ({
+        name: `Callback \u2014 ${provider}`,
+        request: request({
+          method: 'POST',
+          path: ['payment', 'callback', provider],
+          body: { orderId: 1, transactionId: 'TXN123', status: 'success', amount: 2100 },
+        }),
+      })),
+    ]),
+    folder('Payment Gateways', [
+      { name: 'List (filters: q, type, isManual, isActive)', request: request({ method: 'GET', path: ['admin', 'payment-gateway'], query: [{ key: 'page', value: '0' }, { key: 'size', value: '10' }, { key: 'q', value: '' }, { key: 'type', value: '' }, { key: 'isManual', value: '' }, { key: 'isActive', value: '' }] }) },
+      { name: 'Detail', request: request({ method: 'GET', path: ['admin', 'payment-gateway', '1'] }) },
+      { name: 'Create manual MFS (slug is generated)', request: request({ method: 'POST', path: ['admin', 'payment-gateway'], body: { name: 'bKash', nameBN: 'বিকাশ', type: 'mfs', isManual: true, accountName: 'Jabaib Fashion Ltd.', accountNumber: '01700000000', description: '<p>Send the <strong>total</strong> to the number below.</p>' } }) },
+      { name: 'Create manual bank transfer', request: request({ method: 'POST', path: ['admin', 'payment-gateway'], body: { name: 'DBBL Transfer', nameBN: 'ডিবিবিএল ট্রান্সফার', type: 'bank', isManual: true, accountName: 'Jabaib Fashion Ltd.', accountNumber: '01700000000', bankName: 'Dutch-Bangla Bank', branchName: 'Dhanmondi Branch' } }) },
+      { name: 'Create automated gateway (requires provider)', request: request({ method: 'POST', path: ['admin', 'payment-gateway'], body: { name: 'Nagad Auto', nameBN: 'নগদ অটো', type: 'mfs', isManual: false, provider: 'nagad' } }) },
+      { name: 'Update', request: request({ method: 'PATCH', path: ['admin', 'payment-gateway', '1'], body: { isActive: true } }) },
+      { name: 'Delete', request: request({ method: 'DELETE', path: ['admin', 'payment-gateway', '1'] }) },
+      { name: 'Upload icon', request: request({ method: 'POST', path: ['admin', 'payment-gateway', 'upload-icon'] }) },
+      { name: 'Remove icon', request: request({ method: 'DELETE', path: ['admin', 'payment-gateway', '1', 'icon'] }) },
+    ]),
     folder('Order Returns', [
       { name: 'List', request: request({ method: 'GET', path: ['admin', 'order-return'], query: [{ key: 'page', value: '0' }, { key: 'size', value: '10' }] }) },
       { name: 'Detail', request: request({ method: 'GET', path: ['admin', 'order-return', '1'] }) },
@@ -140,6 +163,10 @@ const users = makeCollection(
       { name: 'Register (auto-login)', request: request({ method: 'POST', path: ['user', 'auth', 'register'], body: { name: 'Rafi Ahmed', email: 'customer@example.com', phone: '01712345678', password: 'Secret@123' } }) },
       { name: 'Update profile', request: request({ method: 'PATCH', path: ['user', 'auth', 'profile'], body: { name: 'Rafi Ahmed', phone: '01812345678' }, useUserToken: true }) },
       { name: 'Change password', request: request({ method: 'POST', path: ['user', 'auth', 'change-password'], body: { currentPassword: 'Secret@123', newPassword: 'NewSecret@123' }, useUserToken: true }) },
+    ]),
+    folder('Payment Gateways', [
+      { name: 'Active gateways (checkout options)', request: request({ method: 'GET', path: ['user', 'payment-gateway'] }) },
+      { name: 'Checkout preview with a manual gateway', request: request({ method: 'POST', path: ['user', 'checkout', 'preview'], body: { deliveryType: 'inside_dhaka', paymentMethod: 'cod', paymentGatewayId: 1, paymentMetaData: { txnId: 'TXN123456' } }, useUserToken: true }) },
     ]),
     folder('Categories', [
       { name: 'List', request: request({ method: 'GET', path: ['user', 'category'], useUserToken: true }) },
