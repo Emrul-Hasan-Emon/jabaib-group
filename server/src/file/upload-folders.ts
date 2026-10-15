@@ -23,6 +23,7 @@ export const UPLOAD_FOLDERS = {
   adminUser: 'admin',
   customer: 'user',
   orderReturn: 'order-return',
+  paymentGateway: 'payment-gateway',
   general: 'general',
 } as const;
 

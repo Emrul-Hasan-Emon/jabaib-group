@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Jabaib API \u2014 Orders",
+    "name": "Jabaib API — Orders",
     "_postman_id": "jabaib-orders-collection",
     "description": "Orders + returns. List/detail with status transitions, payment recording, notes, and returns.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -222,7 +222,7 @@
           }
         },
         {
-          "name": "Divisions \u2192 districts (filter dropdowns)",
+          "name": "Divisions → districts (filter dropdowns)",
           "request": {
             "method": "GET",
             "header": [
@@ -352,6 +352,403 @@
       ]
     },
     {
+      "name": "Payment Callbacks",
+      "item": [
+        {
+          "name": "Callback — bkash",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/bkash",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "bkash"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
+            }
+          }
+        },
+        {
+          "name": "Callback — nagad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/nagad",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "nagad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
+            }
+          }
+        },
+        {
+          "name": "Callback — card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/payment/callback/card",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "payment",
+                "callback",
+                "card"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Gateways",
+      "item": [
+        {
+          "name": "List (filters: q, type, isManual, isActive)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway?page=0&size=10&q=&type=&isManual=&isActive=",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "isManual",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create manual MFS (slug is generated)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"bKash\",\n  \"nameBN\": \"বিকাশ\",\n  \"type\": \"mfs\",\n  \"isManual\": true,\n  \"accountName\": \"Jabaib Fashion Ltd.\",\n  \"accountNumber\": \"01700000000\",\n  \"description\": \"<p>Send the <strong>total</strong> to the number below.</p>\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create manual bank transfer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"DBBL Transfer\",\n  \"nameBN\": \"ডিবিবিএল ট্রান্সফার\",\n  \"type\": \"bank\",\n  \"isManual\": true,\n  \"accountName\": \"Jabaib Fashion Ltd.\",\n  \"accountNumber\": \"01700000000\",\n  \"bankName\": \"Dutch-Bangla Bank\",\n  \"branchName\": \"Dhanmondi Branch\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create automated gateway (requires provider)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nagad Auto\",\n  \"nameBN\": \"নগদ অটো\",\n  \"type\": \"mfs\",\n  \"isManual\": false,\n  \"provider\": \"nagad\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload icon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway/upload-icon",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway",
+                "upload-icon"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove icon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/payment-gateway/1/icon",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "payment-gateway",
+                "1",
+                "icon"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Order Returns",
       "item": [
         {
@@ -420,7 +817,7 @@
           }
         },
         {
-          "name": "Update status (requested \u2192 approved/\u2026 \u2192 refunded)",
+          "name": "Update status (requested → approved/… → refunded)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -449,95 +846,6 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"Item received in good condition\",\n  \"refundAmount\": 1390,\n  \"refundMethod\": \"bkash\"\n}"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Payment Callbacks",
-      "item": [
-        {
-          "name": "Callback \u2014 bkash",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:3000/v1/payment/callback/bkash",
-              "host": [
-                "http://localhost:3000"
-              ],
-              "path": [
-                "v1",
-                "payment",
-                "callback",
-                "bkash"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
-            }
-          }
-        },
-        {
-          "name": "Callback \u2014 nagad",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:3000/v1/payment/callback/nagad",
-              "host": [
-                "http://localhost:3000"
-              ],
-              "path": [
-                "v1",
-                "payment",
-                "callback",
-                "nagad"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
-            }
-          }
-        },
-        {
-          "name": "Callback \u2014 card",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:3000/v1/payment/callback/card",
-              "host": [
-                "http://localhost:3000"
-              ],
-              "path": [
-                "v1",
-                "payment",
-                "callback",
-                "card"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"orderId\": 1,\n  \"transactionId\": \"TXN123\",\n  \"status\": \"success\",\n  \"amount\": 2100\n}"
             }
           }
         }
