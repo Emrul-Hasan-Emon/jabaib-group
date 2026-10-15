@@ -4,7 +4,7 @@
  */
 import * as crypto from 'node:crypto';
 import bcrypt from 'bcrypt';
-import { AdminUser, Order, User } from '../src/database/entities';
+import { AdminUser, Order, Payment, User } from '../src/database/entities';
 import {
   ensureTestDatabase,
   syncTestDatabase,
@@ -175,6 +175,51 @@ describe('Payment callbacks — signature, validation and replay', () => {
       (p: { transactionId: string | null }) => p.transactionId === 'TX-D',
     );
     expect(paidRows).toHaveLength(1);
+  });
+
+  it('settles the pending payment created at order placement without duplicating it', async () => {
+    // Reproduces the real online-order shape: checkout books a `pending`
+    // payment carrying the customer's TrxID, then the gateway calls back.
+    const fresh = await seedOnlineOrder('bkash');
+    const ds = await openTestDataSource();
+    const repo = ds.getRepository(Payment);
+    await repo.save(
+      repo.create({
+        orderId: fresh,
+        method: 'bkash',
+        status: 'pending',
+        amount: total,
+        transactionId: 'TX-PLACED',
+        createdBy: customerId,
+        creatorType: 'user',
+      }),
+    );
+    await ds.destroy();
+
+    const body = {
+      orderId: fresh,
+      transactionId: 'TX-PLACED',
+      status: 'success',
+      amount: total,
+    };
+    const res = await callback('bkash', body, sign(body));
+    expect(res.status).toBe(201);
+
+    const after = await api(
+      server.baseUrl,
+      'get',
+      `/v1/admin/order/${fresh}`,
+      adminToken,
+    );
+    const rows = after.body.payments ?? [];
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toEqual(
+      expect.objectContaining({
+        transactionId: 'TX-PLACED',
+        status: 'paid',
+      }),
+    );
+    expect(after.body.paymentStatus).toBe('paid');
   });
 
   it('refuses a different reference for an already paid order', async () => {
