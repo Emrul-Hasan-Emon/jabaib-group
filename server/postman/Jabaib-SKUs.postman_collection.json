@@ -1,0 +1,253 @@
+{
+  "info": {
+    "name": "Jabaib API \u2014 SKUs",
+    "_postman_id": "jabaib-skus-collection",
+    "description": "SKU + variant flow. After the product is saved, create SKUs one by one. Each SKU: price, discountedPrice (defaults to price), startDate/endDate (discount validity), and attributeId/attributeValueId pairs stored in ProductSKUVariant.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (sets token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@jabaib.com\",\n  \"password\": \"Admin@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('adminAccessToken', res.accessToken);",
+                  "pm.collectionVariables.set('adminRefreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SKUs",
+      "item": [
+        {
+          "name": "List by product",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/product/1/skus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "product",
+                "1",
+                "skus"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get one",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/sku/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "sku",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create SKU",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/product/1/skus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "product",
+                "1",
+                "skus"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"TSH-RED-M\",\n  \"price\": 1290,\n  \"discountedPrice\": 990,\n  \"discountedPriceStartDate\": \"2026-10-05T00:00:00.000Z\",\n  \"discountedPriceEndDate\": \"2026-11-05T00:00:00.000Z\",\n  \"quantity\": 20,\n  \"lowStockThreshold\": 5,\n  \"isDefault\": true,\n  \"isActive\": true,\n  \"variants\": [\n    {\n      \"attributeId\": 1,\n      \"attributeValueId\": 1\n    },\n    {\n      \"attributeId\": 2,\n      \"attributeValueId\": 2\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Create SKU (discountedPrice defaults to price)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/product/1/skus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "product",
+                "1",
+                "skus"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"TSH-RED-L\",\n  \"price\": 1290,\n  \"quantity\": 15,\n  \"variants\": [\n    {\n      \"attributeId\": 1,\n      \"attributeValueId\": 2\n    },\n    {\n      \"attributeId\": 2,\n      \"attributeValueId\": 2\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update SKU (replace variants)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/sku/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "sku",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1390,\n  \"discountedPrice\": 1090,\n  \"discountedPriceStartDate\": \"2026-10-06T00:00:00.000Z\",\n  \"discountedPriceEndDate\": \"2026-12-06T00:00:00.000Z\",\n  \"variants\": [\n    {\n      \"attributeId\": 1,\n      \"attributeValueId\": 1\n    },\n    {\n      \"attributeId\": 2,\n      \"attributeValueId\": 2\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Deactivate SKU (no delete endpoint — deactivate instead)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/sku/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "sku",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+:root {
+  --background: 40 30% 98%;
+  --foreground: 30 10% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 30 10% 12%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 30 10% 12%;
+
+  /* Primary action color: near-black — premium editorial feel */
+  --primary: 30 12% 10%;
+  --primary-foreground: 40 30% 98%;
+
+  --secondary: 36 25% 93%;
+  --secondary-foreground: 30 15% 25%;
+
+  --muted: 36 20% 95%;
+  --muted-foreground: 30 5% 45%;
+
+  /* Champagne-gold accent */
+  --accent: 42 65% 92%;
+  --accent-foreground: 32 40% 25%;
+
+  --destructive: 4 72% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 36 18% 88%;
+  --input: 36 18% 88%;
+  --ring: 42 60% 45%;
+
+  --radius: 0.5rem;
+
+  /* Premium ecommerce tokens */
+  --topbar-bg: 30 12% 10%;
+  --topbar-foreground: 40 30% 96%;
+  --nav-bg: 0 0% 100%;
+  --nav-foreground: 30 8% 30%;
+  --hero-gradient-start: 40 35% 97%;
+  --hero-gradient-end: 36 30% 92%;
+  --badge-orange: 42 75% 45%;
+  --badge-orange-foreground: 0 0% 100%;
+  --badge-red: 4 72% 50%;
+  --badge-red-foreground: 0 0% 100%;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 30 8% 30%;
+  --sidebar-primary: 30 12% 10%;
+  --sidebar-primary-foreground: 40 30% 98%;
+  --sidebar-accent: 40 30% 95%;
+  --sidebar-accent-foreground: 30 15% 25%;
+  --sidebar-border: 36 18% 88%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-topbar: hsl(var(--topbar-bg));
+  --color-topbar-foreground: hsl(var(--topbar-foreground));
+  --color-nav: hsl(var(--nav-bg));
+  --color-nav-foreground: hsl(var(--nav-foreground));
+  --color-badge-orange: hsl(var(--badge-orange));
+  --color-badge-orange-foreground: hsl(var(--badge-orange-foreground));
+  --color-badge-red: hsl(var(--badge-red));
+  --color-badge-red-foreground: hsl(var(--badge-red-foreground));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ---------- storefront utilities ---------- */
+
+/* hide horizontal scrollbars on touch rails / carousels */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* auth form inputs (login / register) */
+.auth-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  padding: 0.65rem 0.9rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  outline: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+.auth-input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.35);
+}
+.auth-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.7);
+}
+
+/* ---------- rich text (admin editor + storefront rendering) ---------- */
+
+/* editor surface: placeholder only while empty */
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+}
+
+/*
+ * Rendered admin-authored HTML (payment gateway descriptions).
+ * The server sanitizes to a small allow-list before storing; these rules give
+ * that markup the premium typography instead of browser-default output.
+ */
+.rich-text > *:first-child {
+  margin-top: 0;
+}
+.rich-text > *:last-child {
+  margin-bottom: 0;
+}
+.rich-text p {
+  margin: 0.5rem 0;
+}
+.rich-text h2 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.rich-text h3 {
+  margin: 0.65rem 0 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.rich-text h4 {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.rich-text ul,
+.rich-text ol {
+  margin: 0.45rem 0;
+  padding-left: 1.25rem;
+}
+.rich-text ul {
+  list-style: disc;
+}
+.rich-text ol {
+  list-style: decimal;
+}
+.rich-text li {
+  margin: 0.2rem 0;
+}
+.rich-text blockquote {
+  margin: 0.5rem 0;
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 0.7rem;
+  color: hsl(var(--muted-foreground));
+}
+.rich-text code {
+  border-radius: 0.3rem;
+  background: hsl(var(--muted));
+  padding: 0.05rem 0.3rem;
+  font-size: 0.85em;
+}
+.rich-text a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rich-text strong,
+.rich-text b {
+  font-weight: 700;
+}

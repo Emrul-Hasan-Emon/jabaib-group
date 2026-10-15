@@ -1,0 +1,147 @@
+{
+  "info": {
+    "name": "Jabaib API — Customer Management",
+    "_postman_id": "jabaib-phase5-customers",
+    "description": "Phase 5 — Customers. Customer list with order & wishlist counts, and per-customer detail (orders, addresses, wishlist, auth providers).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (sets token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/auth/login",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@jabaib.com\",\n  \"password\": \"Admin@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('adminAccessToken', res.accessToken);",
+                  "pm.collectionVariables.set('adminRefreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/customer?page=0&size=10&q=&isActive=",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "customer"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/customer/1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "customer",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
