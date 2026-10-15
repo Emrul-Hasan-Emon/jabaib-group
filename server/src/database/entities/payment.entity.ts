@@ -29,6 +29,15 @@ export class Payment extends BaseEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   transactionId: string;
 
+  /**
+   * Gateway-specific details the customer submitted at checkout for a manual
+   * payment, e.g. `{ txnId }` for MFS or `{ accountName, accountNumber,
+   * bankName, branchName }` for a bank transfer. Kept as a free-form object so
+   * a new gateway type can carry its own fields without a schema change.
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  metaData: Record<string, unknown>;
+
   /** Provider-reported payload for bKash/Nagad/card callbacks. */
   @Column({ type: 'jsonb', nullable: true })
   providerResponse: Record<string, unknown>;

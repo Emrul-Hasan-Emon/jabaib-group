@@ -32,6 +32,7 @@ import {
   OrderReturnItem,
   OrderReturnStatusHistory,
   Payment,
+  PaymentGateway,
   ShippingZone,
   Banner,
   HomepageSection,
@@ -77,6 +78,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   orderReturnItem: Repository<OrderReturnItem>;
   orderReturnStatusHistory: Repository<OrderReturnStatusHistory>;
   payment: Repository<Payment>;
+  paymentGateway: Repository<PaymentGateway>;
   shippingZone: Repository<ShippingZone>;
   banner: Repository<Banner>;
   homepageSection: Repository<HomepageSection>;
@@ -145,6 +147,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     private readonly orderReturnStatusHistoryRepository: Repository<OrderReturnStatusHistory>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
+    @InjectRepository(PaymentGateway)
+    private readonly paymentGatewayRepository: Repository<PaymentGateway>,
     @InjectRepository(ShippingZone)
     private readonly shippingZoneRepository: Repository<ShippingZone>,
     @InjectRepository(Banner)
@@ -190,6 +194,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.orderReturnItem = this.orderReturnItemRepository;
     this.orderReturnStatusHistory = this.orderReturnStatusHistoryRepository;
     this.payment = this.paymentRepository;
+    this.paymentGateway = this.paymentGatewayRepository;
     this.shippingZone = this.shippingZoneRepository;
     this.banner = this.bannerRepository;
     this.homepageSection = this.homepageSectionRepository;
