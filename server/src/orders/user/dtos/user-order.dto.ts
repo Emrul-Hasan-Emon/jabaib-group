@@ -5,6 +5,7 @@ import {
   IsArray,
   IsIn,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   MaxLength,
@@ -95,6 +96,24 @@ export class CheckoutDto {
   @IsString()
   @MaxLength(100)
   transactionId?: string;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description:
+      'Configured payment gateway to pay with. Omit to use the built-in methods above (cod/bkash/nagad/card).',
+  })
+  @IsOptional()
+  @IsInt()
+  paymentGatewayId?: number;
+
+  @ApiPropertyOptional({
+    example: { txnId: 'TXN123456' },
+    description:
+      'What the customer submits for a manual gateway — { txnId } for MFS, or { accountName, accountNumber, bankName, branchName } for a bank transfer. Stored on Payment.metaData.',
+  })
+  @IsOptional()
+  @IsObject()
+  paymentMetaData?: Record<string, unknown>;
 }
 
 /** Same payload as checkout — preview and place must agree. */

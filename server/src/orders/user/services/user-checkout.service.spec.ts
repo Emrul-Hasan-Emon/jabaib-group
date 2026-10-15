@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { UserCheckoutService } from './user-checkout.service';
 import { DatabaseService } from '../../../database/database.service';
 import { UserCouponService } from '../../../marketing/coupon/services/user-coupon.service';
+import { UserPaymentGatewayService } from './user-payment-gateway.service';
 import { DeliveryType, PaymentMethod } from '../../../database/enums/enums';
 
 const USER = {
@@ -125,11 +126,19 @@ describe('UserCheckoutService (totals + atomic order placement)', () => {
     (db as any).__saved = saved;
     (db as any).__manager = manager;
 
+    // No gateway in the payload by default -> the built-in methods are used.
+    const gateways = {
+      resolve: jest.fn(async () => {
+        throw new Error('resolve() must not be called without a gateway id');
+      }),
+    };
+
     const module = await Test.createTestingModule({
       providers: [
         UserCheckoutService,
         { provide: DatabaseService, useValue: db },
         { provide: UserCouponService, useValue: coupons },
+        { provide: UserPaymentGatewayService, useValue: gateways },
       ],
     }).compile();
     service = module.get(UserCheckoutService);
