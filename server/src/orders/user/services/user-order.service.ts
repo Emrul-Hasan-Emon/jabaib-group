@@ -4,9 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DatabaseService } from '../../../database/database.service';
+import { OrderItem } from '../../../database/entities/order-item.entity';
+import { ProductSKU } from '../../../database/entities/product-sku.entity';
 import { OrderReturn } from '../../../database/entities/order-return.entity';
 import { OrderReturnItem } from '../../../database/entities/order-return-item.entity';
 import { OrderReturnStatusHistory } from '../../../database/entities/order-return-status-history.entity';
+import { OrderStatusHistory } from '../../../database/entities/order-status-history.entity';
 import { JwtPayload } from '../../../auth/jwt/jwt-payload';
 import {
   Pagination,
@@ -131,6 +134,9 @@ export class UserOrderService {
         status: p.status,
         amount: Number(p.amount),
         transactionId: p.transactionId,
+        // What the customer submitted for a manual gateway (txnId / account
+        // details) — their own data, so it belongs in their order view.
+        metaData: p.metaData ?? null,
         paidAt: p.paidAt,
       })),
       returns: returns.map((r) => ({
@@ -169,16 +175,33 @@ export class UserOrderService {
     if (dto.reason?.trim()) {
       order.note = dto.reason.trim();
     }
-    await this.database.order.save(order);
-    await this.database.orderStatusHistory.save(
-      this.database.orderStatusHistory.create({
-        orderId: id,
-        status: OrderStatus.CANCELLED,
-        note: dto.reason?.trim() || 'Cancelled by customer',
-        createdBy: user.id,
-        creatorType: 'user',
-      }),
-    );
+    await this.database.transaction(async (manager) => {
+      await manager.save(order);
+
+      // Checkout decremented stock when the order was placed. A cancelled
+      // pending order was never shipped, so those units go back on the shelf —
+      // otherwise abandoned orders permanently consume inventory.
+      const items = await manager.find(OrderItem, { where: { orderId: id } });
+      for (const item of items) {
+        if (!item.productSKUId) continue;
+        await manager.increment(
+          ProductSKU,
+          { id: item.productSKUId },
+          'quantity',
+          item.quantity,
+        );
+      }
+
+      await manager.save(
+        manager.create(OrderStatusHistory, {
+          orderId: id,
+          status: OrderStatus.CANCELLED,
+          note: dto.reason?.trim() || 'Cancelled by customer',
+          createdBy: user.id,
+          creatorType: 'user',
+        }),
+      );
+    });
     return this.findOne(user.id, id);
   }
 

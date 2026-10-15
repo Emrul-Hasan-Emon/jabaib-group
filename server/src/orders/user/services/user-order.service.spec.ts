@@ -74,6 +74,11 @@ describe('UserOrderService (my orders, cancel, returns)', () => {
         return withId;
       }),
       findOne: jest.fn(async () => null),
+      find: jest.fn(async () => [
+        { productSKUId: 21, quantity: 2 },
+        { productSKUId: 22, quantity: 1 },
+      ]),
+      increment: jest.fn(async () => ({ affected: 1 })),
     };
     (db as any) = undefined;
 
@@ -205,21 +210,45 @@ describe('UserOrderService (my orders, cancel, returns)', () => {
       const result = await service.cancel(USER, 1, {
         reason: 'Ordered by mistake',
       });
-      expect(db.order.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 1,
-          status: 'cancelled',
-          note: 'Ordered by mistake',
-        }),
-      );
-      expect(db.orderStatusHistory.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          orderId: 1,
-          status: 'cancelled',
-          creatorType: 'user',
-        }),
+      const saved = (db as any).__saved as any[];
+      expect(saved).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 1,
+            status: 'cancelled',
+            note: 'Ordered by mistake',
+          }),
+          expect.objectContaining({
+            orderId: 1,
+            status: 'cancelled',
+            creatorType: 'user',
+          }),
+        ]),
       );
       expect(result.canCancel).toBe(false);
+    });
+
+    it('returns the reserved stock to the shelf when an order is cancelled', async () => {
+      db.order.findOne
+        .mockResolvedValueOnce(order())
+        .mockResolvedValue(order({ status: 'cancelled' }));
+      await service.cancel(USER, 1, {});
+
+      const manager = (db as any).__manager;
+      // one increment per order line, by the quantity that was reserved
+      expect(manager.increment).toHaveBeenCalledTimes(2);
+      expect(manager.increment).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 21 },
+        'quantity',
+        2,
+      );
+      expect(manager.increment).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 22 },
+        'quantity',
+        1,
+      );
     });
 
     it('refuses to cancel an order that already shipped', async () => {

@@ -25,6 +25,8 @@ import {
 } from '../../../database/enums/enums';
 import { effectiveSkuPrice } from '../../../catalog/user/utils/product-summary';
 import { UserCouponService } from '../../../marketing/coupon/services/user-coupon.service';
+import { UserPaymentGatewayService } from './user-payment-gateway.service';
+import { manualPaymentReference } from '../../utils/payment-gateway.util';
 import { CheckoutDto } from '../dtos/user-order.dto';
 
 interface PricedLine {
@@ -56,6 +58,7 @@ export class UserCheckoutService {
   constructor(
     private readonly database: DatabaseService,
     private readonly coupons: UserCouponService,
+    private readonly gateways: UserPaymentGatewayService,
   ) {}
 
   // ---------------------------------------------------------------- preview --
@@ -78,8 +81,13 @@ export class UserCheckoutService {
     const discountAmount = coupon?.valid ? coupon.discountAmount : 0;
     const deliveryCharge = Number(shipping?.charge ?? 0);
 
+    // Same resolution the place-order path uses, so the summary a customer sees
+    // is the one the order will actually be written with.
+    const payment = await this.resolvePayment(dto);
+
     return {
       items: lines.map((l) => this.lineView(l)),
+      payment,
       address,
       delivery: {
         type: dto.deliveryType,
@@ -96,6 +104,61 @@ export class UserCheckoutService {
         discountAmount,
         total: round2(subtotal + deliveryCharge - discountAmount),
       },
+    };
+  }
+
+  /**
+   * Turn the checkout payload into the payment we will actually record.
+   *
+   * - With `paymentGatewayId`: an active gateway decides the method. A manual
+   *   gateway is stored under its own slug with the customer's submitted proof in
+   *   `metaData`; an automated one reuses its provider and the existing
+   *   gateway-callback settlement.
+   * - Without it: the built-in methods (cod/bkash/nagad/card) behave exactly as
+   *   before — including requiring a reference for every non-COD method.
+   */
+  private async resolvePayment(dto: CheckoutDto): Promise<{
+    method: string;
+    metaData: Record<string, string> | null;
+    transactionId?: string;
+  }> {
+    if (dto.paymentGatewayId) {
+      const resolved = await this.gateways.resolve(
+        dto.paymentGatewayId,
+        dto.paymentMetaData,
+      );
+      const metaData = resolved.paymentMetaData;
+      if (resolved.gateway.isManual) {
+        return {
+          method: resolved.paymentMethod,
+          metaData,
+          transactionId:
+            manualPaymentReference(resolved.gateway.type, metaData ?? {}),
+        };
+      }
+      // Automated: still a manual reference from the customer until the
+      // provider callback confirms it, same as bkash/nagad/card today.
+      if (!dto.transactionId?.trim()) {
+        throw new BadRequestException(
+          'Enter the transaction reference for this payment method',
+        );
+      }
+      return {
+        method: resolved.paymentMethod,
+        metaData: null,
+        transactionId: dto.transactionId.trim(),
+      };
+    }
+
+    if (dto.paymentMethod !== PaymentMethod.COD && !dto.transactionId?.trim()) {
+      throw new BadRequestException(
+        'Enter the transaction reference for this payment method',
+      );
+    }
+    return {
+      method: dto.paymentMethod,
+      metaData: null,
+      transactionId: dto.transactionId?.trim() || undefined,
     };
   }
 
@@ -125,11 +188,7 @@ export class UserCheckoutService {
     const discountAmount = couponCheck?.discountAmount ?? 0;
     const total = round2(subtotal + deliveryCharge - discountAmount);
 
-    if (dto.paymentMethod !== PaymentMethod.COD && !dto.transactionId?.trim()) {
-      throw new BadRequestException(
-        'Enter the transaction reference for this payment method',
-      );
-    }
+    const payment = await this.resolvePayment(dto);
 
     const cart = await this.database.cart.findOne({
       where: { userId: user.id },
@@ -149,7 +208,7 @@ export class UserCheckoutService {
           deliveryCharge,
           discountAmount,
           total,
-          paymentMethod: dto.paymentMethod,
+          paymentMethod: payment.method,
           paymentStatus: PaymentStatus.PENDING,
           note: dto.note?.trim() || undefined,
           createdBy: user.id,
@@ -207,10 +266,12 @@ export class UserCheckoutService {
       await manager.save(
         manager.create(Payment, {
           orderId: order.id,
-          method: dto.paymentMethod,
+          method: payment.method,
           status: PaymentStatus.PENDING,
           amount: total,
-          transactionId: dto.transactionId?.trim() || undefined,
+          transactionId: payment.transactionId,
+          // Manual proof (txnId / account details) submitted by the customer.
+          metaData: payment.metaData ?? undefined,
           createdBy: user.id,
           creatorType: 'user',
         }),
