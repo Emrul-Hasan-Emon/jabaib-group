@@ -23,6 +23,7 @@ import {
 import { AdminCategoryService } from '../services/admin-category.service';
 import { CreateCategoryDto } from '../dtos/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/update-category.dto';
+import { CategoryParentChainsDto } from '../dtos/parent-chains.dto';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../../../auth/jwt/jwt-payload';
@@ -58,6 +59,15 @@ export class AdminCategoryController {
   @ApiOperation({ summary: 'Full category tree' })
   tree() {
     return this.service.tree();
+  }
+
+  @Post('parent-chains')
+  @ApiOperation({
+    summary:
+      'Batch root→leaf ancestor chains for the given category ids (unknown/deleted id => empty array)',
+  })
+  parentChains(@Body() dto: CategoryParentChainsDto) {
+    return this.service.parentChains(dto);
   }
 
   @Get(':id')

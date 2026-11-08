@@ -4,31 +4,71 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAdminAuth } from '@/lib/admin-auth';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Media { id: number; url: string; type: string; isPrimary: boolean }
 interface SkuVariant { attribute?: { name: string }; attributeValue?: { name: string } }
 interface Sku {
   id: number;
   sku: string;
+  imageUrl: string | null;
   price: number;
+  myBuyingPrice: number | null;
   discountedPrice: number | null;
   discountedPriceStartDate: string | null;
   discountedPriceEndDate: string | null;
   quantity: number;
+  lowStockThreshold: number;
   isDefault: boolean;
   isActive: boolean;
   skuVariants: SkuVariant[];
+}
+interface CategoryDetail {
+  id: number;
+  name: string;
+  nameBN: string | null;
+  slug: string;
+  description: string | null;
+  descriptionBN: string | null;
+  imageUrl: string | null;
+}
+interface CollectionDetail {
+  id: number;
+  name: string;
+  nameBN: string | null;
+  slug: string;
+  colorCode: string | null;
+}
+interface ProductDetail {
+  id: number;
+  name: string;
+  nameBN: string | null;
+  slug: string;
+  description: string | null;
+  descriptionBN: string | null;
+  seoTitle: string | null;
+  seoTitleBN: string | null;
+  seoDescription: string | null;
+  seoDescriptionBN: string | null;
+  thumbnailUrl: string | null;
+  isFeatured: boolean;
+  isPublished: boolean;
+  isActive: boolean;
+  category: CategoryDetail | null;
+  collection: CollectionDetail | null;
+  media: Media[];
+  skus: Sku[];
 }
 
 export default function ProductDetailsPage() {
   const { api } = useAdminAuth();
   const params = useParams();
   const id = Number(params.id);
-  const [product, setProduct] = useState<Record<string, any> | null>(null);
+  const [product, setProduct] = useState<ProductDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const p = await api.get<Record<string, any>>(`/v1/admin/product/${id}`);
+    const p = await api.get<ProductDetail>(`/v1/admin/product/${id}`);
     setProduct(p);
   }, [api, id]);
 
@@ -71,7 +111,7 @@ export default function ProductDetailsPage() {
       <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="md:col-span-1">
           {product.thumbnailUrl && (
-            <img src={product.thumbnailUrl} alt={product.name} className="aspect-square w-full rounded-xl border border-border object-cover" />
+            <img src={mediaUrl(product.thumbnailUrl)} alt={product.name} className="aspect-square w-full rounded-xl border border-border object-cover" />
           )}
         </div>
         <div className="md:col-span-2">
@@ -85,6 +125,52 @@ export default function ProductDetailsPage() {
         </div>
       </div>
 
+      <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-3 font-semibold">Category</h2>
+          {product.category ? (
+            <div className="flex gap-3">
+              {product.category.imageUrl && (
+                <img src={mediaUrl(product.category.imageUrl)} alt={product.category.name} className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover" />
+              )}
+              <div className="text-sm">
+                <p className="font-medium">{product.category.name}{product.category.nameBN ? ` · ${product.category.nameBN}` : ''}</p>
+                <p className="text-xs text-muted-foreground">{product.category.slug}</p>
+                {product.category.description && (
+                  <p className="mt-1 text-xs text-muted-foreground">{product.category.description}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No category assigned.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-3 font-semibold">Collection</h2>
+          {product.collection ? (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="h-8 w-8 shrink-0 rounded-md border border-border" style={{ background: product.collection.colorCode ?? '#ddd' }} />
+              <div>
+                <p className="font-medium">{product.collection.name}{product.collection.nameBN ? ` · ${product.collection.nameBN}` : ''}</p>
+                <p className="text-xs text-muted-foreground">{product.collection.slug}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No collection assigned.</p>
+          )}
+        </div>
+      </div>
+
+      {(product.seoTitle || product.seoDescription) && (
+        <div className="mb-5 rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-2 font-semibold">SEO</h2>
+          <p className="text-sm"><span className="text-muted-foreground">Title: </span>{product.seoTitle || '—'}</p>
+          {product.seoTitleBN && <p className="text-sm"><span className="text-muted-foreground">Title (BN): </span>{product.seoTitleBN}</p>}
+          <p className="mt-1 text-sm"><span className="text-muted-foreground">Description: </span>{product.seoDescription || '—'}</p>
+          {product.seoDescriptionBN && <p className="text-sm"><span className="text-muted-foreground">Description (BN): </span>{product.seoDescriptionBN}</p>}
+        </div>
+      )}
+
       {product.media?.length > 0 && (
         <div className="mb-5 rounded-xl border border-border bg-card p-5">
           <h2 className="mb-3 font-semibold">Media gallery ({product.media.length})</h2>
@@ -92,9 +178,9 @@ export default function ProductDetailsPage() {
             {product.media.map((m: Media) => (
               <div key={m.id} className="relative overflow-hidden rounded-lg border border-border">
                 {m.type === 'video' ? (
-                  <video src={m.url} className="aspect-square w-full object-cover" muted />
+                  <video src={mediaUrl(m.url)} className="aspect-square w-full object-cover" muted />
                 ) : (
-                  <img src={m.url} alt={m.url} className="aspect-square w-full object-cover" />
+                  <img src={mediaUrl(m.url)} alt={m.url} className="aspect-square w-full object-cover" />
                 )}
                 {m.isPrimary && (
                   <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Primary</span>
@@ -111,20 +197,29 @@ export default function ProductDetailsPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-muted-foreground">
               <tr>
-                <th className="py-1">SKU</th><th>Variants</th><th>Price</th><th>Discount</th><th>Valid</th><th>Qty</th><th>State</th>
+                <th className="py-1">Image</th><th>SKU</th><th>Variants</th><th>Buy price</th><th>Price</th><th>Discount</th><th>Valid</th><th>Qty</th><th>Low stock at</th><th>State</th>
               </tr>
             </thead>
             <tbody>
               {(product.skus ?? []).map((s: Sku) => (
                 <tr key={s.id} className={`border-t border-border ${!s.isActive ? 'opacity-50' : ''}`}>
-                  <td className="py-2 font-medium">{s.sku}{s.isDefault ? ' ★' : ''}{!s.isActive ? ' (inactive)' : ''}</td>
+                  <td className="py-2">
+                    {s.imageUrl ? (
+                      <img src={mediaUrl(s.imageUrl)} alt={s.sku} className="h-10 w-10 rounded-md border border-border object-cover" />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="font-medium">{s.sku}{s.isDefault ? ' ★' : ''}{!s.isActive ? ' (inactive)' : ''}</td>
                   <td>{s.skuVariants?.map((v) => `${v.attribute?.name}: ${v.attributeValue?.name}`).join(', ') || '—'}</td>
+                  <td>{s.myBuyingPrice != null ? `৳${s.myBuyingPrice}` : '—'}</td>
                   <td>৳{s.price}</td>
                   <td>{s.discountedPrice != null ? `৳${s.discountedPrice}` : '—'}</td>
                   <td className="text-xs">
                     {s.discountedPriceStartDate ? new Date(s.discountedPriceStartDate).toLocaleDateString() : '—'} → {s.discountedPriceEndDate ? new Date(s.discountedPriceEndDate).toLocaleDateString() : '—'}
                   </td>
                   <td>{s.quantity}</td>
+                  <td>{s.lowStockThreshold}</td>
                   <td>
                     <span className={`rounded-full px-2 py-0.5 text-xs ${s.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                       {s.isActive ? 'Active' : 'Inactive'}
@@ -133,7 +228,7 @@ export default function ProductDetailsPage() {
                 </tr>
               ))}
               {(product.skus ?? []).length === 0 && (
-                <tr><td colSpan={7} className="py-6 text-center text-muted-foreground">No SKUs yet — add them from the edit page.</td></tr>
+                <tr><td colSpan={10} className="py-6 text-center text-muted-foreground">No SKUs yet — add them from the edit page.</td></tr>
               )}
             </tbody>
           </table>

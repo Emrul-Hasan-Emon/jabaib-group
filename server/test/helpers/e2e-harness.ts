@@ -15,6 +15,8 @@ import * as net from 'node:net';
 import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { buildDataSourceOptions } from '../../src/database/orm-config';
+import { PaymentGateway } from '../../src/database/entities';
+import { PaymentGatewayType, PaymentMethod } from '../../src/database/enums/enums';
 
 export const TEST_DB = process.env.TEST_DB ?? 'jabaib_test';
 
@@ -68,6 +70,26 @@ export async function openTestDataSource() {
   const ds = new DataSource(buildDataSourceOptions(testDbConnection()));
   await ds.initialize();
   return ds;
+}
+
+/**
+ * Checkout resolves payment through a `PaymentGateway` id only — every spec
+ * that places an order needs at least the seeded Cash on Delivery gateway
+ * (mirrors `src/database/seeds/seed.ts`). Returns its id.
+ */
+export async function seedCodGateway(ds: DataSource): Promise<number> {
+  const gateway = await ds.getRepository(PaymentGateway).save(
+    ds.getRepository(PaymentGateway).create({
+      name: 'Cash on Delivery',
+      nameBN: 'ক্যাশ অন ডেলিভারি',
+      slug: 'cash-on-delivery',
+      type: PaymentGatewayType.MFS,
+      isManual: false,
+      provider: PaymentMethod.COD,
+      isActive: true,
+    }),
+  );
+  return gateway.id;
 }
 
 export async function getFreePort(): Promise<number> {

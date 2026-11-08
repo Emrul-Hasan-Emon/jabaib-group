@@ -26,6 +26,8 @@ export enum PaymentGatewayType {
 }
 
 export enum PaymentStatus {
+  /** Order placed, no payment settled yet — the initial state for every new order. */
+  DUE = 'due',
   PENDING = 'pending',
   PAID = 'paid',
   FAILED = 'failed',

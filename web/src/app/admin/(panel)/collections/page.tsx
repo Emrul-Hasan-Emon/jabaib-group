@@ -85,8 +85,7 @@ export default function CollectionsPage() {
                 <td className="px-4 py-2">{l.isActive ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-right">
                   <button onClick={() => setDetailsTarget(l)} className="mr-3 text-muted-foreground">Details</button>
-                  <Link href={`/admin/collections/${l.id}`} className="mr-3 text-primary">Edit</Link>
-                  <button onClick={() => setDeleteTarget(l)} className="text-red-600">Delete</button>
+                  <Link href={`/admin/collections/${l.id}`} className="text-primary">Edit</Link>
                 </td>
               </tr>
             ))}

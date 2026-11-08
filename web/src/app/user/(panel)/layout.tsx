@@ -46,7 +46,7 @@ export default function UserPanelLayout({
             </span>
             <div className="flex items-center gap-1">
               <Link
-                href="/shop"
+                href="/user/shop"
                 className="hidden rounded-full border border-border px-3 py-1.5 text-xs font-medium text-nav-foreground transition hover:bg-muted sm:block"
               >
                 {t('Back to shop', 'শপে ফিরুন')}

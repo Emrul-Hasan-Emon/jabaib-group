@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAdminAuth } from "@/lib/admin-auth";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 const NEXT: Record<string, string[]> = {
   pending: ["confirmed", "cancelled"],
@@ -23,6 +24,8 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [confirmPayment, setConfirmPayment] = useState(false);
 
   const load = useCallback(async () => {
     const res = await api.get<any>(`/v1/admin/order/${id}`);
@@ -36,13 +39,15 @@ export default function OrderDetailPage() {
 
   if (!order) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
-  const transition = async (status: string) => {
-    if (!status) return;
+  const confirmTransition = async () => {
+    if (!pendingStatus) return;
     try {
-      await api.patch(`/v1/admin/order/${id}/status`, { status });
+      await api.patch(`/v1/admin/order/${id}/status`, { status: pendingStatus });
       await load();
     } catch (e: any) {
       setError(e.message);
+    } finally {
+      setPendingStatus(null);
     }
   };
 
@@ -52,6 +57,8 @@ export default function OrderDetailPage() {
       await load();
     } catch (e: any) {
       setError(e.message);
+    } finally {
+      setConfirmPayment(false);
     }
   };
 
@@ -102,7 +109,7 @@ export default function OrderDetailPage() {
           <select
             className="rounded-md border border-input px-3 py-1.5 text-sm capitalize"
             value=""
-            onChange={(e) => transition(e.target.value)}
+            onChange={(e) => e.target.value && setPendingStatus(e.target.value)}
           >
             <option value="">Select…</option>
             {nextStatuses.map((s) => (
@@ -120,13 +127,31 @@ export default function OrderDetailPage() {
         )}
         {order.paymentStatus !== "paid" && (
           <button
-            onClick={recordPayment}
+            onClick={() => setConfirmPayment(true)}
             className="rounded-md border border-border px-3 py-1.5 text-sm"
           >
             Record payment received
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingStatus !== null}
+        title="Change order status"
+        message={`Change status from "${order.status}" to "${pendingStatus}"?`}
+        confirmLabel="Change status"
+        onCancel={() => setPendingStatus(null)}
+        onConfirm={confirmTransition}
+      />
+
+      <ConfirmDialog
+        open={confirmPayment}
+        title="Record payment"
+        message="Mark this order's payment as received?"
+        confirmLabel="Record payment"
+        onCancel={() => setConfirmPayment(false)}
+        onConfirm={recordPayment}
+      />
 
       <div className="mb-4 rounded-xl border border-border bg-card p-5">
         <h2 className="mb-3 font-semibold">Items</h2>
@@ -144,7 +169,18 @@ export default function OrderDetailPage() {
             {order.items?.map((it: any) => (
               <tr key={it.id} className="border-t border-border">
                 <td className="py-2">{it.productName}</td>
-                <td>{it.skuData}</td>
+                <td>
+                  <div className="flex flex-wrap gap-1">
+                    {parseSkuData(it.skuData).map((v, i) => (
+                      <span
+                        key={i}
+                        className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                      >
+                        {v.attribute}: {v.value}
+                      </span>
+                    ))}
+                  </div>
+                </td>
                 <td>{it.quantity}</td>
                 <td>৳{it.unitDiscountedPricePrice}</td>
                 <td>৳{it.totalDiscountedPrice}</td>
@@ -236,4 +272,16 @@ export default function OrderDetailPage() {
       )}
     </div>
   );
+}
+
+function parseSkuData(skuData: unknown): { attribute: string; value: string }[] {
+  try {
+    const parsed = typeof skuData === "string" ? JSON.parse(skuData) : skuData;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((v) => v && typeof v === "object" && "attribute" in v && "value" in v)
+      .map((v) => ({ attribute: String(v.attribute), value: String(v.value) }));
+  } catch {
+    return [];
+  }
 }

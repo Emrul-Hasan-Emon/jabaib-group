@@ -27,6 +27,7 @@ import {
   Order,
   OrderItem,
   OrderStatusHistory,
+  PaymentStatusHistory,
   OrderAddress,
   OrderReturn,
   OrderReturnItem,
@@ -73,6 +74,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   order: Repository<Order>;
   orderItem: Repository<OrderItem>;
   orderStatusHistory: Repository<OrderStatusHistory>;
+  paymentStatusHistory: Repository<PaymentStatusHistory>;
   orderAddress: Repository<OrderAddress>;
   orderReturn: Repository<OrderReturn>;
   orderReturnItem: Repository<OrderReturnItem>;
@@ -137,6 +139,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     private readonly orderItemRepository: Repository<OrderItem>,
     @InjectRepository(OrderStatusHistory)
     private readonly orderStatusHistoryRepository: Repository<OrderStatusHistory>,
+    @InjectRepository(PaymentStatusHistory)
+    private readonly paymentStatusHistoryRepository: Repository<PaymentStatusHistory>,
     @InjectRepository(OrderAddress)
     private readonly orderAddressRepository: Repository<OrderAddress>,
     @InjectRepository(OrderReturn)
@@ -189,6 +193,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.order = this.orderRepository;
     this.orderItem = this.orderItemRepository;
     this.orderStatusHistory = this.orderStatusHistoryRepository;
+    this.paymentStatusHistory = this.paymentStatusHistoryRepository;
     this.orderAddress = this.orderAddressRepository;
     this.orderReturn = this.orderReturnRepository;
     this.orderReturnItem = this.orderReturnItemRepository;

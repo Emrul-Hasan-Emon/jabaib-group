@@ -98,8 +98,7 @@ export default function AttributesPage() {
                 <td className="px-4 py-2">{a.isActive ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-right">
                   <button onClick={() => setDetailsTarget(a)} className="mr-3 text-muted-foreground">Details</button>
-                  <Link href={`/admin/attributes/${a.id}`} className="mr-3 text-primary">Edit</Link>
-                  <button onClick={() => setDeleteTarget(a)} className="text-red-600">Delete</button>
+                  <Link href={`/admin/attributes/${a.id}`} className="text-primary">Edit</Link>
                 </td>
               </tr>
             ))}

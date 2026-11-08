@@ -70,8 +70,8 @@ describe('Payment callbacks — signature, validation and replay', () => {
   });
 
   /** A bKash order placed straight through the admin API is not available, so
-   *  the row is seeded the way checkout would write it. */
-  async function seedOnlineOrder(paymentMethod: string, status = 'pending') {
+   *  the row is seeded the way checkout would write it (paymentStatus `due`). */
+  async function seedOnlineOrder(paymentMethod: string, status = 'due') {
     const ds = await openTestDataSource();
     const order = await ds.getRepository(Order).save(
       ds.getRepository(Order).create({
@@ -178,7 +178,7 @@ describe('Payment callbacks — signature, validation and replay', () => {
   });
 
   it('settles the pending payment created at order placement without duplicating it', async () => {
-    // Reproduces the real online-order shape: checkout books a `pending`
+    // Reproduces the real online-order shape: checkout books a `due`
     // payment carrying the customer's TrxID, then the gateway calls back.
     const fresh = await seedOnlineOrder('bkash');
     const ds = await openTestDataSource();
@@ -187,7 +187,7 @@ describe('Payment callbacks — signature, validation and replay', () => {
       repo.create({
         orderId: fresh,
         method: 'bkash',
-        status: 'pending',
+        status: 'due',
         amount: total,
         transactionId: 'TX-PLACED',
         createdBy: customerId,

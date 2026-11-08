@@ -9,7 +9,7 @@ import { Cart } from '../../database/entities/cart.entity';
 import { CartItem } from '../../database/entities/cart-item.entity';
 import { Product } from '../../database/entities/product.entity';
 import { ProductSKU } from '../../database/entities/product-sku.entity';
-import { effectiveSkuPrice } from '../../catalog/user/utils/product-summary';
+import { effectiveSkuPrice } from '../../catalog/product/utils/product-summary';
 import { skuLabel } from '../../catalog/utils/sku-label';
 import { AddCartItemDto } from '../dtos/cart.dto';
 

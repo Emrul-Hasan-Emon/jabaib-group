@@ -5,6 +5,19 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 
+interface CouponResponse {
+  code: string;
+  type: 'flat' | 'percent';
+  amount: number;
+  minOrderAmount?: number | null;
+  maxDiscountAmount?: number | null;
+  usageLimit?: number | null;
+  perUserLimit?: number | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  isActive: boolean;
+}
+
 export function CouponForm({ couponId }: { couponId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
@@ -24,7 +37,7 @@ export function CouponForm({ couponId }: { couponId?: number }) {
 
   useEffect(() => {
     if (couponId) {
-      api.get<Record<string, any>>(`/v1/admin/coupon/${couponId}`).then((c) => {
+      api.get<CouponResponse>(`/v1/admin/coupon/${couponId}`).then((c) => {
         setCode(c.code);
         setType(c.type);
         setAmount(String(c.amount));

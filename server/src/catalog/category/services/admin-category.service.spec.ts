@@ -181,4 +181,42 @@ describe('AdminCategoryService (audit tracker fields)', () => {
       );
     });
   });
+
+  describe('parentChains', () => {
+    const men = { id: 1, name: 'Men', nameBN: 'পুরুষ', parentId: null };
+    const shirts = { id: 2, name: 'Shirts', nameBN: 'শার্ট', parentId: 1 };
+    const tshirts = {
+      id: 3,
+      name: 'T-Shirts',
+      nameBN: 'টি-শার্ট',
+      parentId: 2,
+    };
+    const sarees = { id: 4, name: 'Sarees', nameBN: 'শাড়ি', parentId: null };
+
+    beforeEach(() => {
+      db.category.find.mockResolvedValue([men, shirts, tshirts, sarees]);
+    });
+
+    it('returns the root→leaf chain per requested id, keyed by id', async () => {
+      const result = await service.parentChains({ ids: [3, 4] });
+      expect(result).toEqual({
+        3: [
+          { id: 1, name: 'Men', nameBN: 'পুরুষ' },
+          { id: 2, name: 'Shirts', nameBN: 'শার্ট' },
+          { id: 3, name: 'T-Shirts', nameBN: 'টি-শার্ট' },
+        ],
+        4: [{ id: 4, name: 'Sarees', nameBN: 'শাড়ি' }],
+      });
+    });
+
+    it('keeps the key with an empty array for an unknown/deleted id', async () => {
+      const result = await service.parentChains({ ids: [999] });
+      expect(result).toEqual({ 999: [] });
+    });
+
+    it('issues a single find() regardless of how many ids are requested', async () => {
+      await service.parentChains({ ids: [1, 2, 3, 4, 999] });
+      expect(db.category.find).toHaveBeenCalledTimes(1);
+    });
+  });
 });

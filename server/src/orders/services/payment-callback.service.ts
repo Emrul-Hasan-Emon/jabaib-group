@@ -6,6 +6,7 @@ import {
 import { DatabaseService } from '../../database/database.service';
 import { PaymentMethod, PaymentStatus } from '../../database/enums/enums';
 import { Payment } from '../../database/entities/payment.entity';
+import { PaymentStatusHistory } from '../../database/entities/payment-status-history.entity';
 import { PaymentCallbackDto } from '../dtos/payment-callback.dto';
 
 /** Payment rows written by a gateway callback are stamped as such. */
@@ -87,6 +88,14 @@ export class PaymentCallbackService {
 
     order.paymentStatus = status;
     await this.database.order.save(order);
+    await this.database.paymentStatusHistory.save(
+      this.database.paymentStatusHistory.create({
+        orderId: dto.orderId,
+        status,
+        note: `Gateway callback (${provider})`,
+        ...CREATOR,
+      }),
+    );
     return payment;
   }
 }

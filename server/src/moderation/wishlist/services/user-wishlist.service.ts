@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import type { QueryDeepPartialEntity } from 'typeorm';
 import { DatabaseService } from '../../../database/database.service';
 import { Wishlist } from '../../../database/entities/wishlist.entity';
-import { productToSummary } from '../../../catalog/user/utils/product-summary';
+import { productToSummary } from '../../../catalog/product/utils/product-summary';
 
 /**
  * Customer wishlist. One row per (user, product) thanks to the unique index;

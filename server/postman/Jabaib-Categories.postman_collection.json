@@ -138,6 +138,38 @@
           }
         },
         {
+          "name": "Parent chains (batch)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/category/parent-chains",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "category",
+                "parent-chains"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"ids\": [1, 2, 3]}"
+            }
+          }
+        },
+        {
           "name": "Get one",
           "request": {
             "method": "GET",

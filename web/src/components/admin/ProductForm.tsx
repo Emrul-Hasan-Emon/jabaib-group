@@ -7,6 +7,7 @@ import { useAdminAuth } from '@/lib/admin-auth';
 import { uploadImage, uploadManyImages } from '@/lib/admin-upload';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { flattenCategoryTree, type CategoryTree } from '@/lib/category-tree';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Category {
   id: number;
@@ -367,7 +368,7 @@ export function ProductForm({ productId }: { productId?: number }) {
             <div className="mt-2 flex items-start gap-4 rounded-lg border border-dashed border-border p-4">
               {thumbnail ? (
                 <>
-                  <img src={thumbnail} alt="thumbnail preview" className="h-24 w-24 rounded-lg border border-border object-cover" />
+                  <img src={mediaUrl(thumbnail)} alt="thumbnail preview" className="h-24 w-24 rounded-lg border border-border object-cover" />
                   <div className="flex flex-col gap-2">
                     <span className="text-xs text-muted-foreground">{thumbnail}</span>
                     <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium">
@@ -401,9 +402,9 @@ export function ProductForm({ productId }: { productId?: number }) {
               <div key={m.id} className="w-28">
                 <div className="relative overflow-hidden rounded-lg border border-border">
                   {m.type === 'video' ? (
-                    <video src={m.url} className="h-28 w-full object-cover" muted />
+                    <video src={mediaUrl(m.url)} className="h-28 w-full object-cover" muted />
                   ) : (
-                    <img src={m.url} alt={m.url} className="h-28 w-full object-cover" />
+                    <img src={mediaUrl(m.url)} alt={m.url} className="h-28 w-full object-cover" />
                   )}
                   {m.isPrimary && (
                     <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Primary</span>

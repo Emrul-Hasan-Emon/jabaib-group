@@ -10,6 +10,7 @@ import {
   ensureTestDatabase,
   syncTestDatabase,
   openTestDataSource,
+  seedCodGateway,
   getFreePort,
   bootServer,
   adminLogin,
@@ -22,6 +23,7 @@ import {
   AttributeValue,
   Category,
   Coupon,
+  PaymentGateway,
   Product,
   ProductSKU,
   ProductSKUVariant,
@@ -31,6 +33,7 @@ import { AdminUserRoleEnum } from '../src/database/enums/user-type.enum';
 import {
   CouponType,
   DeliveryType,
+  PaymentGatewayType,
   PaymentMethod,
 } from '../src/database/enums/enums';
 
@@ -43,6 +46,8 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
   let userToken: string;
   let productId = 0;
   let skuId = 0;
+  let codGatewayId = 0;
+  let bkashGatewayId = 0;
   let orderId = 0;
   let orderItemId = 0;
 
@@ -130,6 +135,20 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
         isActive: true,
       }),
     ]);
+
+    codGatewayId = await seedCodGateway(ds);
+    const bkash = await ds.getRepository(PaymentGateway).save(
+      ds.getRepository(PaymentGateway).create({
+        name: 'bKash',
+        nameBN: 'বিকাশ',
+        slug: 'bkash-auto',
+        type: PaymentGatewayType.MFS,
+        isManual: false,
+        provider: PaymentMethod.BKASH,
+        isActive: true,
+      }),
+    );
+    bkashGatewayId = bkash.id;
 
     await ds.getRepository(Coupon).save([
       ds.getRepository(Coupon).create({
@@ -296,7 +315,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       phone: '01755550001',
       address: 'House 9, Road 3, Dhanmondi',
       deliveryType: DeliveryType.INSIDE_DHAKA,
-      paymentMethod: PaymentMethod.COD,
+      paymentGatewayId: codGatewayId,
       couponCode: 'E2E25',
     });
     expect(res.status).toBe(200);
@@ -319,7 +338,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       phone: '01755550001',
       address: 'House 9, Road 3',
       deliveryType: DeliveryType.INSIDE_DHAKA,
-      paymentMethod: PaymentMethod.BKASH,
+      paymentGatewayId: bkashGatewayId,
     });
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/transaction reference/i);
@@ -331,7 +350,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       phone: '01755550001',
       address: 'House 9, Road 3, Dhanmondi',
       deliveryType: DeliveryType.INSIDE_DHAKA,
-      paymentMethod: PaymentMethod.COD,
+      paymentGatewayId: codGatewayId,
       couponCode: 'E2E25',
       note: 'Call before delivery',
     });
@@ -359,7 +378,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       expect.objectContaining({ recipientName: 'Checkout Tester' }),
     );
     expect(detail.body.payments[0]).toEqual(
-      expect.objectContaining({ method: PaymentMethod.COD, status: 'pending' }),
+      expect.objectContaining({ method: PaymentMethod.COD, status: 'due' }),
     );
     expect(detail.body.statusHistory[0]).toEqual(
       expect.objectContaining({ status: 'pending' }),
@@ -399,7 +418,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       phone: '01755550001',
       address: 'House 9, Road 3',
       deliveryType: DeliveryType.OUTSIDE_DHAKA,
-      paymentMethod: PaymentMethod.COD,
+      paymentGatewayId: codGatewayId,
       couponCode: 'E2E25',
     });
     expect(res.status).toBe(400);
@@ -412,7 +431,7 @@ describe('Phase 10 — cart, checkout, orders and returns', () => {
       phone: '01755550001',
       address: 'House 9, Road 3',
       deliveryType: DeliveryType.OUTSIDE_DHAKA,
-      paymentMethod: PaymentMethod.COD,
+      paymentGatewayId: codGatewayId,
     });
     const list = await asUser('get', '/v1/user/order?size=5');
     const pending = list.body.data.find((o: any) => o.status === 'pending');

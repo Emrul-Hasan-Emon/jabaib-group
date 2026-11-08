@@ -7,7 +7,12 @@ import { District } from '../entities/district.entity';
 import { ShippingZone } from '../entities/shipping-zone.entity';
 import { Language } from '../entities/language.entity';
 import { AdminUser } from '../entities/admin-user.entity';
-import { DeliveryType } from '../enums/enums';
+import { PaymentGateway } from '../entities/payment-gateway.entity';
+import {
+  DeliveryType,
+  PaymentGatewayType,
+  PaymentMethod,
+} from '../enums/enums';
 import { AdminUserRoleEnum } from '../enums/user-type.enum';
 
 const DIVISIONS: Array<{
@@ -172,6 +177,24 @@ async function seed() {
         isActive: true,
       });
       console.log(`Seeded super admin: ${email}`);
+    }
+
+    // Cash on Delivery payment gateway — order creation (admin and storefront)
+    // always resolves `paymentMethod` through a PaymentGateway row, COD included.
+    const cod = await qr.manager.findOne(PaymentGateway, {
+      where: { provider: PaymentMethod.COD },
+    });
+    if (!cod) {
+      await qr.manager.save(PaymentGateway, {
+        name: 'Cash on Delivery',
+        nameBN: 'ক্যাশ অন ডেলিভারি',
+        slug: 'cash-on-delivery',
+        type: PaymentGatewayType.MFS,
+        isManual: false,
+        provider: PaymentMethod.COD,
+        isActive: true,
+      });
+      console.log('Seeded Cash on Delivery payment gateway');
     }
 
     await qr.commitTransaction();

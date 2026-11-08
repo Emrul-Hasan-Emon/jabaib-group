@@ -112,7 +112,7 @@ export default function WishlistPage() {
           <p className="text-sm text-muted-foreground">
             Tap the heart on any product to save it here.
           </p>
-          <Link href="/shop" className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
+          <Link href="/user/shop" className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
             {t('Browse products', 'প্রোডাক্ট দেখুন')}
           </Link>
         </div>
@@ -122,7 +122,7 @@ export default function WishlistPage() {
             const image = mediaUrl(row.product.thumbnailUrl);
             return (
               <div key={row.id} className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white">
-                <Link href={`/product/${row.product.slug}`} className="relative block aspect-square overflow-hidden bg-muted">
+                <Link href={`/user/product/${row.product.slug}`} className="relative block aspect-square overflow-hidden bg-muted">
                   {image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={image} alt={row.product.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -140,7 +140,7 @@ export default function WishlistPage() {
                   </button>
                 </Link>
                 <div className="flex flex-1 flex-col p-3">
-                  <Link href={`/product/${row.product.slug}`} className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground hover:text-primary">
+                  <Link href={`/user/product/${row.product.slug}`} className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground hover:text-primary">
                     {t(row.product.name, row.product.nameBN)}
                   </Link>
                   <p className="mt-1 text-sm font-extrabold text-primary">{formatTaka(row.product.priceFrom)}</p>

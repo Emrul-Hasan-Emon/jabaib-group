@@ -63,7 +63,7 @@ describe('Phase 7 — order + return status flows', () => {
         status: OrderStatus.PENDING,
         deliveryType: DeliveryType.INSIDE_DHAKA,
         paymentMethod: PaymentMethod.COD,
-        paymentStatus: PaymentStatus.PENDING,
+        paymentStatus: PaymentStatus.DUE,
         subtotal: 1200,
         deliveryCharge: 80,
         discountAmount: 100,

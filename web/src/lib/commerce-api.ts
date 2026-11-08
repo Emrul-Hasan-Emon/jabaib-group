@@ -139,10 +139,10 @@ export interface CheckoutPayload {
   deliveryType: "inside_dhaka" | "outside_dhaka";
   couponCode?: string;
   note?: string;
-  paymentMethod: "cod" | "bkash" | "nagad" | "card";
+  /** Required for every automated non-COD gateway — the reference from the payment. */
   transactionId?: string;
-  /** Configured gateway to pay with; omit to use the built-in methods above. */
-  paymentGatewayId?: number;
+  /** The gateway to pay with — GET /v1/user/payment-gateway lists every active one, COD included. */
+  paymentGatewayId: number;
   /** What the customer submits for a manual gateway (validated server-side). */
   paymentMetaData?: Record<string, string>;
 }
@@ -242,10 +242,12 @@ export interface OrderSummary {
   status: string;
   deliveryType: string;
   paymentMethod: string;
+  paymentGatewayId: number | null;
   paymentStatus: string;
   itemCount: number;
   total: number;
   subtotal: number;
+  listTotal: number;
   deliveryCharge: number;
   discountAmount: number;
   couponCode: string | null;
@@ -260,8 +262,10 @@ export interface OrderDetail {
   status: string;
   deliveryType: string;
   paymentMethod: string;
+  paymentGatewayId: number | null;
   paymentStatus: string;
   subtotal: number;
+  listTotal: number;
   deliveryCharge: number;
   discountAmount: number;
   couponCode: string | null;

@@ -104,7 +104,7 @@ export default function UserOrdersPage() {
             {t('Once you place an order it will show up here with live tracking.')}
           </p>
           <Link
-            href="/shop"
+            href="/user/shop"
             className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             {t('Start shopping')}

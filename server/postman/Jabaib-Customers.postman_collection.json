@@ -140,6 +140,39 @@
               ]
             }
           }
+        },
+        {
+          "name": "Create address for a customer (admin-placed order)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/customer/1/address",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "customer",
+                "1",
+                "address"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"divisionId\": 1,\n  \"districtId\": 240,\n  \"zipCode\": \"1205\",\n  \"isDefault\": false\n}"
+            }
+          }
         }
       ]
     }

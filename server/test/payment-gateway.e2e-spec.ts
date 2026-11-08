@@ -10,6 +10,7 @@ import {
   ensureTestDatabase,
   syncTestDatabase,
   openTestDataSource,
+  seedCodGateway,
   getFreePort,
   bootServer,
   adminLogin,
@@ -26,6 +27,7 @@ describe('Payment gateways — admin management and checkout', () => {
   let adminToken: string;
   let customerToken: string;
   let productId = 0;
+  let codGatewayId = 0;
 
   const admin = (
     method: 'get' | 'post' | 'patch' | 'delete',
@@ -83,11 +85,16 @@ describe('Payment gateways — admin management and checkout', () => {
         productId: product.id,
         sku: 'GW-TEE-1',
         price: 500,
-        quantity: 10,
+        // generous stock: fillCart() accumulates quantity on the same cart
+        // across every failed-checkout test in this file (a failed order
+        // never empties the cart), so a successful order further down can
+        // consume more than 1 unit.
+        quantity: 100,
         isActive: true,
       }),
     );
     productId = product.id;
+    codGatewayId = await seedCodGateway(ds);
     await ds.destroy();
 
     server = await bootServer(await getFreePort());
@@ -320,7 +327,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const id = await gatewayId('bkash-wallet');
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: id,
         paymentMetaData: { txnId: 'TXN123456' },
       });
@@ -330,7 +336,7 @@ describe('Payment gateways — admin management and checkout', () => {
       expect(detail.body.payments).toEqual([
         expect.objectContaining({
           method: 'bkash-wallet',
-          status: 'pending',
+          status: 'due',
           transactionId: 'TXN123456',
           metaData: { txnId: 'TXN123456' },
         }),
@@ -342,7 +348,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const id = await gatewayId('bkash-wallet');
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: id,
       });
       expect(res.status).toBe(400);
@@ -354,7 +359,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const id = await gatewayId('dbbl-transfer');
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: id,
         paymentMetaData: {
           accountName: 'Gateway Customer',
@@ -385,7 +389,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const id = await gatewayId('dbbl-transfer');
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: id,
         paymentMetaData: { accountName: 'Gateway Customer' },
       });
@@ -402,7 +405,6 @@ describe('Payment gateways — admin management and checkout', () => {
       });
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: row.id,
         paymentMetaData: { txnId: 'TXN1' },
       });
@@ -417,33 +419,49 @@ describe('Payment gateways — admin management and checkout', () => {
       await fillCart();
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: 987654,
         paymentMetaData: { txnId: 'TXN1' },
       });
       expect(res.status).toBe(404);
     });
 
-    it('keeps the existing cod flow working with no gateway selected', async () => {
+    it('pays through the seeded Cash on Delivery gateway, no reference required', async () => {
       await fillCart();
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
+        paymentGatewayId: codGatewayId,
       });
       expect(res.status).toBe(201);
       const detail = await asCustomer('get', `/v1/user/order/${res.body.id}`);
       expect(detail.body.paymentMethod).toBe('cod');
+      expect(detail.body.paymentGatewayId).toBe(codGatewayId);
       expect(detail.body.payments[0]).toEqual(
-        expect.objectContaining({ method: 'cod', status: 'pending' }),
+        expect.objectContaining({ method: 'cod', status: 'due' }),
       );
       expect(detail.body.payments[0].metaData ?? null).toBeNull();
     });
 
-    it('keeps requiring a reference for the automated bkash method', async () => {
+    it('requires paymentGatewayId — there is no built-in payment method anymore', async () => {
       await fillCart();
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'bkash',
+      });
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(res.body.message)).toMatch(/paymentGatewayId/i);
+    });
+
+    it('keeps requiring a reference for an automated non-COD gateway', async () => {
+      const bkash = await admin('post', '/v1/admin/payment-gateway', {
+        name: 'bKash Auto',
+        nameBN: 'বিকাশ অটো',
+        type: 'mfs',
+        isManual: false,
+        provider: 'bkash',
+      });
+      await fillCart();
+      const res = await asCustomer('post', '/v1/user/order', {
+        ...address,
+        paymentGatewayId: bkash.body.id,
       });
       expect(res.status).toBe(400);
       expect(JSON.stringify(res.body.message)).toMatch(/transaction reference/i);
@@ -455,7 +473,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const automated = list.body.data.find((g: any) => g.isManual === false);
       const res = await asCustomer('post', '/v1/user/order', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: automated.id,
         transactionId: 'NAG123',
       });
@@ -476,7 +493,6 @@ describe('Payment gateways — admin management and checkout', () => {
       const id = await gatewayId('bkash-wallet');
       const res = await asCustomer('post', '/v1/user/checkout/preview', {
         ...address,
-        paymentMethod: 'cod',
         paymentGatewayId: id,
         paymentMetaData: { txnId: 'TXN123456' },
       });

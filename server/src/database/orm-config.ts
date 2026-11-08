@@ -8,6 +8,8 @@ export interface DatabaseConnectionOptions {
   username: string;
   password: string;
   database: string;
+  /** Managed Postgres (Neon/Supabase/Render) requires TLS with a self-signed chain. */
+  ssl?: boolean;
 }
 
 /**
@@ -18,9 +20,11 @@ export interface DatabaseConnectionOptions {
 export function buildDataSourceOptions(
   connection: DatabaseConnectionOptions,
 ): DataSourceOptions {
+  const { ssl, ...rest } = connection;
   return {
     type: 'postgres',
-    ...connection,
+    ...rest,
+    ssl: ssl ? { rejectUnauthorized: false } : undefined,
     entities: [...ENTITIES],
     migrations: [path.join(__dirname, 'migrations', '*{.ts,.js}')],
     migrationsTableName: 'typeorm_migrations',

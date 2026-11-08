@@ -23,6 +23,7 @@ import { CouponHistoryLog } from './coupon-history-log.entity';
 import { Order } from './order.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
+import { PaymentStatusHistory } from './payment-status-history.entity';
 import { OrderAddress } from './order-address.entity';
 import { OrderReturn } from './order-return.entity';
 import { OrderReturnItem } from './order-return-item.entity';
@@ -63,6 +64,7 @@ export { CouponHistoryLog } from './coupon-history-log.entity';
 export { Order } from './order.entity';
 export { OrderItem } from './order-item.entity';
 export { OrderStatusHistory } from './order-status-history.entity';
+export { PaymentStatusHistory } from './payment-status-history.entity';
 export { OrderAddress } from './order-address.entity';
 export { OrderReturn } from './order-return.entity';
 export { OrderReturnItem } from './order-return-item.entity';
@@ -103,6 +105,7 @@ export const ENTITIES = [
   Order,
   OrderItem,
   OrderStatusHistory,
+  PaymentStatusHistory,
   OrderAddress,
   OrderReturn,
   OrderReturnItem,

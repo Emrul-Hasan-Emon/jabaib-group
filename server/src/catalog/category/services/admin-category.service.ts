@@ -13,6 +13,7 @@ import {
 } from '../../../common/decorators/pagination-params';
 import { CreateCategoryDto } from '../dtos/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/update-category.dto';
+import { CategoryParentChainsDto } from '../dtos/parent-chains.dto';
 import {
   creatorFields,
   slugify,
@@ -63,6 +64,32 @@ export class AdminCategoryService {
       }
     }
     return roots;
+  }
+
+  /** Root→leaf ancestor chain per requested id, from one whole-table find (no N+1). */
+  async parentChains(dto: CategoryParentChainsDto) {
+    const all = await this.database.category.find();
+    const byId = new Map<number, Category>();
+    for (const c of all) byId.set(c.id, c);
+
+    const result: Record<string, Pick<Category, 'id' | 'name' | 'nameBN'>[]> =
+      {};
+    for (const id of dto.ids) {
+      const chain: Pick<Category, 'id' | 'name' | 'nameBN'>[] = [];
+      let current = byId.get(id);
+      const seen = new Set<number>();
+      while (current && !seen.has(current.id)) {
+        seen.add(current.id);
+        chain.unshift({
+          id: current.id,
+          name: current.name,
+          nameBN: current.nameBN,
+        });
+        current = current.parentId ? byId.get(current.parentId) : undefined;
+      }
+      result[id] = chain;
+    }
+    return result;
   }
 
   async findOne(id: number) {

@@ -118,7 +118,7 @@ export default function MyReviewsPage() {
           <p className="text-sm text-muted-foreground">
             Visit a product page and share what you think about it.
           </p>
-          <Link href="/shop" className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
+          <Link href="/user/shop" className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
             {t('Browse products')}
           </Link>
         </div>
@@ -130,7 +130,7 @@ export default function MyReviewsPage() {
               <div key={r.id} className="rounded-xl border border-border bg-white p-4">
                 <div className="flex items-start gap-3">
                   <Link
-                    href={r.product.slug ? `/product/${r.product.slug}` : '/shop'}
+                    href={r.product.slug ? `/user/product/${r.product.slug}` : '/user/shop'}
                     className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted"
                   >
                     {image ? (
@@ -143,7 +143,7 @@ export default function MyReviewsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        href={r.product.slug ? `/product/${r.product.slug}` : '/shop'}
+                        href={r.product.slug ? `/user/product/${r.product.slug}` : '/user/shop'}
                         className="truncate text-sm font-semibold text-foreground hover:text-primary"
                       >
                         {t(r.product.name, r.product.nameBN)}

@@ -10,5 +10,6 @@ export const dataSource = new DataSource(
     username: process.env.DB_USERNAME ?? 'postgres',
     password: process.env.DB_PASSWORD ?? '',
     database: process.env.DB_DATABASE ?? 'jabaib',
+    ssl: process.env.DB_SSL === 'true',
   }),
 );
