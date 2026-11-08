@@ -227,7 +227,7 @@ export default function OrderDetailPage({
               <span className="min-w-0 flex-1">
                 {item.slug ? (
                   <Link
-                    href={`/product/${item.slug}`}
+                    href={`/user/product/${item.slug}`}
                     className="block truncate text-sm font-semibold text-foreground hover:text-primary"
                   >
                     {item.name}

@@ -8,7 +8,7 @@ function order(partial: Record<string, unknown> = {}) {
   return {
     id: 6,
     paymentMethod: PaymentMethod.BKASH,
-    paymentStatus: 'pending',
+    paymentStatus: 'due',
     total: 1572,
     ...partial,
   };
@@ -28,6 +28,10 @@ describe('PaymentCallbackService (gateway callbacks)', () => {
         findOne: jest.fn(async () => null),
         create: jest.fn((row: any) => ({ ...row })),
         save: jest.fn(async (row: any) => ({ id: 7, ...row })),
+      },
+      paymentStatusHistory: {
+        create: jest.fn((row: any) => row),
+        save: jest.fn(async (row: any) => row),
       },
     };
     const module = await Test.createTestingModule({
@@ -58,6 +62,13 @@ describe('PaymentCallbackService (gateway callbacks)', () => {
     expect(payment.paidAt).toBeInstanceOf(Date);
     expect(db.order.save).toHaveBeenCalledWith(
       expect.objectContaining({ id: 6, paymentStatus: 'paid' }),
+    );
+    expect(db.paymentStatusHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: 6,
+        status: 'paid',
+        creatorType: 'gateway',
+      }),
     );
   });
 
@@ -153,17 +164,17 @@ describe('PaymentCallbackService (gateway callbacks)', () => {
   });
 
   it('settles the pending payment from order placement instead of adding a second row', async () => {
-    // Order placement books a `pending` payment carrying the customer's TrxID;
+    // Order placement books a `due` payment carrying the customer's TrxID;
     // the callback must update that row, not insert a duplicate.
     const pending = {
       id: 31,
       orderId: 6,
       transactionId: 'TX-4',
-      status: 'pending',
+      status: 'due',
       amount: 1572,
       paidAt: null,
     };
-    db.order.findOne.mockResolvedValue(order({ paymentStatus: 'pending' }));
+    db.order.findOne.mockResolvedValue(order({ paymentStatus: 'due' }));
     db.payment.findOne.mockResolvedValue(pending);
 
     await service.handle(PaymentMethod.BKASH, {

@@ -12,7 +12,7 @@ import { QtyStepper } from './QtyStepper';
 /**
  * Slide-over mini cart shown from the header / bottom-nav cart button.
  * Totals come from the server once signed in (guests see their local cart),
- * and checkout hands over to /checkout.
+ * and checkout hands over to /user/checkout.
  */
 export function CartDrawer() {
   const {
@@ -22,6 +22,7 @@ export function CartDrawer() {
     setQty,
     remove,
     subtotal,
+    listTotal,
     savings,
     count,
     busy,
@@ -91,7 +92,7 @@ export function CartDrawer() {
                 {t('Browse the collection and add something you love.')}
               </p>
               <Link
-                href="/shop"
+                href="/user/shop"
                 onClick={closeDrawer}
                 className="mt-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
               >
@@ -106,7 +107,7 @@ export function CartDrawer() {
                   className="flex gap-2.5 rounded-lg border border-border p-1.5 sm:gap-3 sm:p-2"
                 >
                   <Link
-                    href={`/product/${line.slug}`}
+                    href={`/user/product/${line.slug}`}
                     onClick={closeDrawer}
                     className="block h-[68px] w-14 shrink-0 overflow-hidden rounded-md bg-muted sm:h-20 sm:w-16"
                   >
@@ -126,7 +127,7 @@ export function CartDrawer() {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-start justify-between gap-2">
                       <Link
-                        href={`/product/${line.slug}`}
+                        href={`/user/product/${line.slug}`}
                         onClick={closeDrawer}
                         className="line-clamp-2 text-sm font-medium text-foreground hover:text-primary"
                       >
@@ -177,22 +178,30 @@ export function CartDrawer() {
         {lines.length > 0 && (
           <footer className="border-t border-border px-4 py-3">
             {savings > 0 && (
-              <div className="mb-1.5 flex items-center justify-between text-xs text-badge-red-foreground">
-                <span>{t('You save')}</span>
-                <span className="font-bold">{formatTaka(savings)}</span>
-              </div>
+              <>
+                <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    {t('Subtotal')} ({count} {t('items')})
+                  </span>
+                  <span className="line-through">{formatTaka(listTotal)}</span>
+                </div>
+                <div className="mb-1.5 flex items-center justify-between text-xs text-badge-red-foreground">
+                  <span>{t('You save')}</span>
+                  <span className="font-bold">{formatTaka(savings)}</span>
+                </div>
+              </>
             )}
             <div className="mb-3 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {t('Subtotal')} ({count} {t('items')})
+              <span className="font-semibold text-foreground">
+                {t('Total')} ({count} {t('items')})
               </span>
               <span className="text-lg font-bold text-foreground">
                 {formatTaka(subtotal)}
               </span>
             </div>
-            {pathname !== '/checkout' && (
+            {pathname !== '/user/checkout' && (
               <Link
-                href={authed ? '/checkout' : '/user/login?next=/checkout'}
+                href={authed ? '/user/checkout' : '/user/login?next=/user/checkout'}
                 onClick={closeDrawer}
                 className="block w-full rounded-full bg-primary py-2.5 text-center text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 sm:py-3 sm:text-sm"
               >

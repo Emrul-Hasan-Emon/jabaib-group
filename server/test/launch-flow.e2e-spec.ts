@@ -16,6 +16,7 @@ import {
   ensureTestDatabase,
   syncTestDatabase,
   openTestDataSource,
+  seedCodGateway,
   getFreePort,
   bootServer,
   adminLogin,
@@ -25,11 +26,7 @@ import {
 } from './helpers/e2e-harness';
 import { AdminUser, Coupon, ShippingZone } from '../src/database/entities';
 import { AdminUserRoleEnum } from '../src/database/enums/user-type.enum';
-import {
-  CouponType,
-  DeliveryType,
-  PaymentMethod,
-} from '../src/database/enums/enums';
+import { CouponType, DeliveryType } from '../src/database/enums/enums';
 
 const PASSWORD = 'Admin@12345';
 
@@ -43,6 +40,7 @@ describe('Phase 12 — full launch flow (admin + customer, end to end)', () => {
   let productId = 0;
   let skuId = 0;
   let gatewayId = 0;
+  let codGatewayId = 0;
   let stockBeforeCancel = 0;
   let orderId = 0;
   let orderItemId = 0;
@@ -97,6 +95,7 @@ describe('Phase 12 — full launch flow (admin + customer, end to end)', () => {
         isActive: true,
       }),
     );
+    codGatewayId = await seedCodGateway(ds);
     await ds.destroy();
 
     server = await bootServer(await getFreePort());
@@ -222,7 +221,6 @@ describe('Phase 12 — full launch flow (admin + customer, end to end)', () => {
         phone: '01799990000',
         address: 'House 1, Road 1, Dhanmondi',
         deliveryType: DeliveryType.INSIDE_DHAKA,
-        paymentMethod: PaymentMethod.COD,
         paymentGatewayId: gatewayId,
         paymentMetaData: { txnId: 'TXN-LAUNCH-1' },
         couponCode: 'LAUNCH10',
@@ -263,7 +261,7 @@ describe('Phase 12 — full launch flow (admin + customer, end to end)', () => {
         phone: '01799990000',
         address: 'House 2, Road 2, Dhanmondi',
         deliveryType: DeliveryType.INSIDE_DHAKA,
-        paymentMethod: PaymentMethod.COD,
+        paymentGatewayId: codGatewayId,
       });
       expect(order.status).toBe(201);
       cancelOrderId = order.body.id as number;

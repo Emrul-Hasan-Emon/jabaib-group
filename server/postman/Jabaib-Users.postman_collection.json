@@ -272,7 +272,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"paymentGatewayId\": 1,\n  \"paymentMetaData\": {\n    \"txnId\": \"TXN123456\"\n  }\n}"
+              "raw": "{\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentGatewayId\": 1,\n  \"paymentMetaData\": {\n    \"txnId\": \"TXN123456\"\n  }\n}"
             }
           }
         }
@@ -304,6 +304,72 @@
                 "v1",
                 "user",
                 "category"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List — root categories only (parentId=null)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/category?parentId=null",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "category"
+              ],
+              "query": [
+                {
+                  "key": "parentId",
+                  "value": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List — direct children of a category (parentId=<id>)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/user/category?parentId=1",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "user",
+                "category"
+              ],
+              "query": [
+                {
+                  "key": "parentId",
+                  "value": "1"
+                }
               ]
             }
           }
@@ -1128,7 +1194,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"couponCode\": \"EID25\"\n}"
+              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"couponCode\": \"EID25\",\n  \"paymentGatewayId\": 1\n}"
             }
           }
         },
@@ -1160,7 +1226,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"divisionId\": 1,\n  \"districtId\": 240,\n  \"zipCode\": \"1205\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"paymentMethod\": \"bkash\",\n  \"transactionId\": \"9ABC123XYZ\"\n}"
+              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"divisionId\": 1,\n  \"districtId\": 240,\n  \"zipCode\": \"1205\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"transactionId\": \"9ABC123XYZ\",\n  \"paymentGatewayId\": 2\n}"
             }
           }
         }
@@ -1261,7 +1327,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentMethod\": \"cod\",\n  \"couponCode\": \"EID25\",\n  \"note\": \"Please call before delivery\"\n}"
+              "raw": "{\n  \"addressId\": 1,\n  \"deliveryType\": \"inside_dhaka\",\n  \"couponCode\": \"EID25\",\n  \"note\": \"Please call before delivery\",\n  \"paymentGatewayId\": 1\n}"
             }
           }
         },
@@ -1292,7 +1358,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"paymentMethod\": \"bkash\",\n  \"transactionId\": \"9ABC123XYZ\"\n}"
+              "raw": "{\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"deliveryType\": \"outside_dhaka\",\n  \"transactionId\": \"9ABC123XYZ\",\n  \"paymentGatewayId\": 2\n}"
             }
           }
         },

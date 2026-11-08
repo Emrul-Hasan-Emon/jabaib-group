@@ -24,7 +24,7 @@ export function CategoryRail({
         return (
           <Link
             key={c.id}
-            href={`/shop?categoryId=${c.id}`}
+            href={`/user/shop?categoryId=${c.id}`}
             className="group flex w-[62px] shrink-0 snap-start flex-col items-center gap-1 text-center sm:w-20 sm:gap-1.5"
           >
             <span className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-full border border-border bg-accent text-lg font-extrabold text-accent-foreground transition-transform group-hover:scale-105">

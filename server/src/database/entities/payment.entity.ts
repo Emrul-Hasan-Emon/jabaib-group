@@ -10,10 +10,10 @@ export class Payment extends BaseEntity {
   @Index()
   orderId: number;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 100 })
   method: string;
 
-  @Column({ type: 'varchar', length: 20, default: PaymentStatus.PENDING })
+  @Column({ type: 'varchar', length: 20, default: PaymentStatus.DUE })
   @Index()
   status: string;
 

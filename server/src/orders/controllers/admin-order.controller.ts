@@ -11,6 +11,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminOrderService } from '../services/admin-order.service';
 import {
+  CreateOrderDto,
   RecordPaymentDto,
   UpdateOrderNoteDto,
   UpdateOrderStatusDto,
@@ -48,6 +49,15 @@ export class AdminOrderController {
   @ApiOperation({ summary: 'Divisions → districts for filter dropdowns' })
   locations() {
     return this.service.locations();
+  }
+
+  @Post()
+  @ApiOperation({
+    summary:
+      'Create an order on behalf of a customer (no cart/coupon) — always cash on delivery',
+  })
+  create(@Body() dto: CreateOrderDto, @CurrentUser() user: JwtPayload) {
+    return this.service.create(dto, user);
   }
 
   @Get(':id')

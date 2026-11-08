@@ -14,6 +14,14 @@ interface DivisionOption {
   name: string;
 }
 
+interface DistrictResponse {
+  name: string;
+  nameBN?: string | null;
+  slug?: string | null;
+  countryId: number;
+  divisionId: number;
+}
+
 export function DistrictForm({ districtId }: { districtId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();

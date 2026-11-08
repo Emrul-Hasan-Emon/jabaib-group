@@ -1,7 +1,19 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminCustomerService } from '../services/admin-customer.service';
+import { UserAddressService } from '../services/user-address.service';
+import { CreateAddressDto } from '../dtos/address.dto';
 import { Roles } from '../../auth/decorators/roles.decorator';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../../auth/jwt/jwt-payload';
 import { PaginationParams } from '../../common/decorators/pagination-params';
 import type { Pagination } from '../../common/decorators/pagination-params';
 import { AdminUserRoleEnum } from '../../database/enums/user-type.enum';
@@ -17,7 +29,10 @@ const ADMIN_ROLES = [
 @Roles(...ADMIN_ROLES)
 @Controller({ path: 'admin/customer', version: '1' })
 export class AdminCustomerController {
-  constructor(private readonly service: AdminCustomerService) {}
+  constructor(
+    private readonly service: AdminCustomerService,
+    private readonly addresses: UserAddressService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -37,5 +52,19 @@ export class AdminCustomerController {
   })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
+  }
+
+  @Post(':id/address')
+  @ApiOperation({
+    summary:
+      'Create a saved address on behalf of this customer (e.g. while placing an admin order)',
+  })
+  async createAddress(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateAddressDto,
+    @CurrentUser() admin: JwtPayload,
+  ) {
+    await this.service.findOne(id); // 404s if the customer doesn't exist
+    return this.addresses.create(id, dto, admin);
   }
 }

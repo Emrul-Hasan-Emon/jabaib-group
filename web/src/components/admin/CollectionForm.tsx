@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 
+interface CollectionResponse {
+  name: string;
+  nameBN?: string | null;
+  colorCode?: string | null;
+  isActive: boolean;
+}
+
 export function CollectionForm({ collectionId }: { collectionId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
@@ -18,7 +25,7 @@ export function CollectionForm({ collectionId }: { collectionId?: number }) {
 
   useEffect(() => {
     if (collectionId) {
-      api.get<Record<string, any>>(`/v1/admin/collection/${collectionId}`).then((l) => {
+      api.get<CollectionResponse>(`/v1/admin/collection/${collectionId}`).then((l) => {
         setName(l.name);
         setNameBN(l.nameBN ?? '');
         setColorCode(l.colorCode ?? '#111111');

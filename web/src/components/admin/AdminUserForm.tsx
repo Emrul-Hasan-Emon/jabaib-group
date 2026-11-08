@@ -8,6 +8,15 @@ import { ImageUploadField } from '@/components/admin/ImageUploadField';
 
 const ROLES = ['super_admin', 'admin', 'editor'];
 
+interface AdminUserResponse {
+  name: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  imageUrl?: string | null;
+  imagePath?: string | null;
+}
+
 export function AdminUserForm({ adminUserId }: { adminUserId?: number }) {
   const { api, admin: me } = useAdminAuth();
   const router = useRouter();
@@ -25,7 +34,7 @@ export function AdminUserForm({ adminUserId }: { adminUserId?: number }) {
 
   useEffect(() => {
     if (adminUserId) {
-      api.get<Record<string, any>>(`/v1/admin/admin-user/${adminUserId}`).then((a) => {
+      api.get<AdminUserResponse>(`/v1/admin/admin-user/${adminUserId}`).then((a) => {
         setName(a.name);
         setEmail(a.email);
         setRole(a.role);

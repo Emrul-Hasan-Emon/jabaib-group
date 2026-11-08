@@ -13,14 +13,14 @@ import { AdminProductController } from './product/controllers/admin-product.cont
 import { AdminProductService } from './product/services/admin-product.service';
 import { AdminSkuController } from './sku/controllers/admin-sku.controller';
 import { AdminSkuService } from './sku/services/admin-sku.service';
-import { UserCategoryController } from './user/controllers/user-category.controller';
-import { UserCategoryService } from './user/services/user-category.service';
-import { UserProductController } from './user/controllers/user-product.controller';
-import { UserProductService } from './user/services/user-product.service';
-import { UserAttributeController } from './user/controllers/user-attribute.controller';
-import { UserAttributeService } from './user/services/user-attribute.service';
-import { UserCollectionController } from './user/controllers/user-collection.controller';
-import { UserCollectionService } from './user/services/user-collection.service';
+import { UserCategoryController } from './category/controllers/user-category.controller';
+import { UserCategoryService } from './category/services/user-category.service';
+import { UserProductController } from './product/controllers/user-product.controller';
+import { UserProductService } from './product/services/user-product.service';
+import { UserAttributeController } from './attribute/controllers/user-attribute.controller';
+import { UserAttributeService } from './attribute/services/user-attribute.service';
+import { UserCollectionController } from './collection/controllers/user-collection.controller';
+import { UserCollectionService } from './collection/services/user-collection.service';
 
 @Module({
   imports: [FileModule],

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Star, ShieldCheck, PencilLine } from 'lucide-react';
 import { useLocale } from '@/lib/locale';
 import { useUserAuth } from '@/lib/user-auth';
@@ -221,6 +222,8 @@ function ReviewForm({
   onSubmit: () => void;
 }) {
   const { t } = useLocale();
+  const pathname = usePathname();
+  const loginHref = `/user/login?next=${encodeURIComponent(pathname)}`;
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
@@ -267,7 +270,7 @@ function ReviewForm({
 
       {!authed ? (
         <p className="mt-2 text-sm text-muted-foreground">
-          <Link href="/user/login" className="font-semibold text-primary hover:underline">
+          <Link href={loginHref} className="font-semibold text-primary hover:underline">
             Sign in
           </Link>{' '}
           to share your experience with this product.

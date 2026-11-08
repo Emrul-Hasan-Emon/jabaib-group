@@ -55,7 +55,7 @@ async function demo() {
         discountAmount: 0,
         total: 2080,
         paymentMethod: 'cod',
-        paymentStatus: PaymentStatus.PENDING,
+        paymentStatus: PaymentStatus.DUE,
         note: 'Handle with care',
       });
       await qr.manager.save(OrderAddress, {

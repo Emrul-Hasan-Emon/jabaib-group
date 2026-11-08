@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 import { uploadImage } from '@/lib/admin-upload';
 import { flattenCategoryTree, type CategoryTree, type FlatCategory } from '@/lib/category-tree';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Category {
   id: number;
@@ -178,7 +179,7 @@ export function CategoryForm({ categoryId }: { categoryId?: number }) {
           <div className="mt-2 flex items-start gap-4 rounded-lg border border-dashed border-border p-4">
             {image ? (
               <>
-                <img src={image.imageUrl} alt="preview" className="h-24 w-24 rounded-lg border border-border object-cover" />
+                <img src={mediaUrl(image.imageUrl)} alt="preview" className="h-24 w-24 rounded-lg border border-border object-cover" />
                 <div className="flex flex-col gap-2">
                   <span className="text-xs text-muted-foreground">{image.imageUrl}</span>
                   <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium">

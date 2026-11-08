@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { DetailsModal } from '@/components/admin/DetailsModal';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Banner {
   id: number;
@@ -97,7 +98,7 @@ export default function BannersPage() {
               <tr key={b.id} className="border-t border-border">
                 <td className="px-4 py-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.imageUrl} alt="" className="h-10 w-20 rounded-md border border-border object-cover" />
+                  <img src={mediaUrl(b.imageUrl)} alt="" className="h-10 w-20 rounded-md border border-border object-cover" />
                 </td>
                 <td className="px-4 py-2 font-medium">{b.title}{b.titleBN ? ` · ${b.titleBN}` : ''}</td>
                 <td className="px-4 py-2 capitalize">{b.position ?? '—'}</td>

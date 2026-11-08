@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/locale';
 import { useCart } from '@/lib/cart';
 import { useWishlist } from '@/lib/wishlist';
@@ -26,8 +26,10 @@ export function ProductCard({
   const { add } = useCart();
   const { ids, toggling, toggle } = useWishlist();
   const router = useRouter();
+  const pathname = usePathname();
   const image = mediaUrl(product.thumbnailUrl);
-  const onSale = product.hasDiscount && product.compareAtFrom != null;
+  const percentOff = discountPercent(product.compareAtFrom, product.priceFrom);
+  const onSale = product.hasDiscount && product.compareAtFrom != null && percentOff > 0;
   const wished = ids.has(product.id);
 
   const quickAdd = (e: React.MouseEvent) => {
@@ -48,12 +50,12 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     const result = await toggle(product.id);
-    if (result === 'guest') router.push('/user/login');
+    if (result === 'guest') router.push(`/user/login?next=${encodeURIComponent(pathname)}`);
   };
 
   return (
     <Link
-      href={`/product/${product.slug}`}
+      href={`/user/product/${product.slug}`}
       className="group flex snap-start flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md"
     >
       {/* Mobile-first density: square images on phones keep each card short so
@@ -75,7 +77,7 @@ export function ProductCard({
         )}
         {onSale && (
           <span className="absolute left-1.5 top-1.5 rounded-full bg-badge-red px-1.5 py-px text-[10px] font-bold text-badge-red-foreground">
-            -{discountPercent(product.compareAtFrom, product.priceFrom)}%
+            -{percentOff}%
           </span>
         )}
         {product.collection && (

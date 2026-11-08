@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 
+interface CountryResponse {
+  name: string;
+  nameBN?: string | null;
+  slug?: string | null;
+  code?: string | null;
+  currency?: string | null;
+  isActive: boolean;
+}
+
 export function CountryForm({ countryId }: { countryId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
@@ -20,7 +29,7 @@ export function CountryForm({ countryId }: { countryId?: number }) {
 
   useEffect(() => {
     if (countryId) {
-      api.get<Record<string, any>>(`/v1/admin/country/${countryId}`).then((c) => {
+      api.get<CountryResponse>(`/v1/admin/country/${countryId}`).then((c) => {
         setName(c.name);
         setNameBN(c.nameBN ?? '');
         setSlug(c.slug ?? '');

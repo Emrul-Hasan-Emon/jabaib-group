@@ -11,7 +11,9 @@ import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
+import { PaymentStatusHistory } from './payment-status-history.entity';
 import { OrderAddress } from './order-address.entity';
+import { PaymentGateway } from './payment-gateway.entity';
 import {
   DeliveryType,
   OrderStatus,
@@ -50,6 +52,15 @@ export class Order extends BaseEntity {
     default: 0,
     transformer: decimalTransformer,
   })
+  listTotal: number; // sum of all item totalPrice (list price, before any SKU discount)
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: decimalTransformer,
+  })
   subtotal: number; // sum of all item totalDiscountedPrice before discount, delivery charge, and coupon discount
 
   @Column({
@@ -79,10 +90,15 @@ export class Order extends BaseEntity {
   })
   total: number; // subtotal + deliveryCharge - discountAmount
 
-  @Column({ type: 'varchar', length: 20 })
-  paymentMethod: string; // PaymentMethod enum values: 'cod' or 'online'
+  @Column({ type: 'varchar', length: 100 })
+  paymentMethod: string; // built-in PaymentMethod value, or a configured PaymentGateway's slug/provider
 
-  @Column({ type: 'varchar', length: 20, default: PaymentStatus.PENDING })
+  /** Configured gateway the order was paid through — null for a built-in method (e.g. plain COD). */
+  @Column({ type: 'int', nullable: true })
+  @Index()
+  paymentGatewayId: number | null;
+
+  @Column({ type: 'varchar', length: 20, default: PaymentStatus.DUE })
   @Index()
   paymentStatus: string;
 
@@ -99,6 +115,13 @@ export class Order extends BaseEntity {
   @OneToMany(() => OrderStatusHistory, (history) => history.order)
   statusHistory: OrderStatusHistory[];
 
+  @OneToMany(() => PaymentStatusHistory, (history) => history.order)
+  paymentStatusHistory: PaymentStatusHistory[];
+
   @OneToOne(() => OrderAddress, (address) => address.order)
   address: OrderAddress;
+
+  @ManyToOne(() => PaymentGateway, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'paymentGatewayId' })
+  paymentGateway: PaymentGateway | null;
 }

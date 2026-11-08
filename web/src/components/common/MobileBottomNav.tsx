@@ -17,12 +17,13 @@ export function MobileBottomNav() {
   const { count, openDrawer } = useCart();
   const { status } = useUserAuth();
   const authed = status === 'authed';
+  const loginHref = `/user/login?next=${encodeURIComponent(pathname)}`;
 
   const items = [
     { href: '/', label: t('Home'), icon: Home, exact: true },
-    { href: '/categories', label: t('Categories'), icon: LayoutList },
-    { href: '/shop', label: t('Shop'), icon: Grid3x3 },
-    { href: authed ? '/user/dashboard' : '/user/login', label: t('Account'), icon: User },
+    { href: '/user/categories', label: t('Categories'), icon: LayoutList },
+    { href: '/user/shop', label: t('Shop'), icon: Grid3x3 },
+    { href: authed ? '/user/dashboard' : loginHref, label: t('Account'), icon: User },
   ];
 
   const active = (href: string, exact?: boolean) =>
@@ -49,8 +50,8 @@ export function MobileBottomNav() {
         <button
           onClick={openDrawer}
           className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 text-[11px] font-medium ${
-            // the cart lives in the drawer + /checkout (there is no /cart page)
-            pathname === '/checkout' ? 'text-primary' : 'text-nav-foreground'
+            // the cart lives in the drawer + /user/checkout (there is no /cart page)
+            pathname === '/user/checkout' ? 'text-primary' : 'text-nav-foreground'
           }`}
         >
           <span className="relative">

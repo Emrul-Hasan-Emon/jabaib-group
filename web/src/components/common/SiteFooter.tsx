@@ -56,10 +56,10 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-3 font-semibold text-white">{t('Shop')}</h4>
           <ul className="space-y-2 text-white/60">
-            <li><Link href="/shop" className="hover:text-white">{t('All products')}</Link></li>
-            <li><Link href="/shop?sort=newest" className="hover:text-white">{t('New arrivals')}</Link></li>
-            <li><Link href="/shop?sort=price-desc" className="hover:text-white">{t('Premium picks')}</Link></li>
-            <li><Link href="/shop" className="hover:text-white">{t('Sale')}</Link></li>
+            <li><Link href="/user/shop" className="hover:text-white">{t('All products')}</Link></li>
+            <li><Link href="/user/shop?sort=newest" className="hover:text-white">{t('New arrivals')}</Link></li>
+            <li><Link href="/user/shop?sort=price-desc" className="hover:text-white">{t('Premium picks')}</Link></li>
+            <li><Link href="/user/shop" className="hover:text-white">{t('Sale')}</Link></li>
           </ul>
         </div>
         <div>

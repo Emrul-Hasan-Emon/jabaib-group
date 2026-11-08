@@ -77,7 +77,7 @@ export default function HomeContent() {
                 title={categorySection?.title ?? t('Shop by category')}
                 titleBN={categorySection?.titleBN}
                 subtitle={t('Everything from everyday basics to statement pieces.')}
-                viewAllHref="/categories"
+                viewAllHref="/user/categories"
               />
               <CategoryRail
                 categories={
@@ -96,7 +96,7 @@ export default function HomeContent() {
               title={section.title}
               titleBN={section.titleBN}
               products={section.items as ProductSummary[]}
-              viewAllHref="/shop"
+              viewAllHref="/user/shop"
             />
           ))}
 
@@ -159,7 +159,7 @@ function FeaturedFallback() {
       <ProductShelf
         title={t('Featured for you')}
         products={featured}
-        viewAllHref="/shop?isFeatured=true"
+        viewAllHref="/user/shop?isFeatured=true"
       />
     </div>
   );
@@ -170,7 +170,7 @@ function PromoBanner({ banner }: { banner: Banner }) {
   const image = mediaUrl(banner.mobileImageUrl ?? banner.imageUrl);
   return (
     <Link
-      href={banner.linkUrl ?? '/shop'}
+      href={banner.linkUrl ?? '/user/shop'}
       className="relative block overflow-hidden rounded-2xl"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -12,7 +12,16 @@ interface OrderRow {
   paymentMethod: string;
   total: number;
   createdAt: string;
+  deliveryType: string;
   user?: { name: string; phone: string | null } | null;
+  address?: {
+    recipientName: string;
+    phone: string;
+    address: string;
+    zipCode: string | null;
+    division?: { name: string } | null;
+    district?: { name: string } | null;
+  } | null;
 }
 
 interface Division { id: number; name: string; districts: { id: number; name: string }[] }
@@ -24,6 +33,7 @@ const PAYMENT_METHODS = ['cod', 'bkash', 'nagad', 'card'];
 export default function OrdersPage() {
   const { api } = useAdminAuth();
   const [rows, setRows] = useState<OrderRow[]>([]);
+  const [orderNumber, setOrderNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [mobile, setMobile] = useState('');
   const [divisionId, setDivisionId] = useState('');
@@ -35,10 +45,10 @@ export default function OrdersPage() {
   const [endDate, setEndDate] = useState('');
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const params = new URLSearchParams({ page: '0', size: '50' });
+    if (orderNumber) params.set('q', orderNumber);
     if (customerName) params.set('customerName', customerName);
     if (mobile) params.set('mobile', mobile);
     if (divisionId) params.set('divisionId', divisionId);
@@ -50,7 +60,7 @@ export default function OrdersPage() {
     if (endDate) params.set('endDate', new Date(endDate).toISOString());
     const res = await api.get<{ data: OrderRow[] }>(`/v1/admin/order?${params}`);
     setRows(res.data);
-  }, [api, customerName, mobile, divisionId, districtId, method, status, paymentStatus, startDate, endDate]);
+  }, [api, orderNumber, customerName, mobile, divisionId, districtId, method, status, paymentStatus, startDate, endDate]);
 
   useEffect(() => {
     load().catch((e) => setError(e.message));
@@ -63,30 +73,21 @@ export default function OrdersPage() {
       .catch(() => {});
   }, [api]);
 
-  const changeStatus = async (o: OrderRow, next: string) => {
-    setBusyId(o.id);
-    setError(null);
-    try {
-      await api.patch(`/v1/admin/order/${o.id}/status`, { status: next });
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Status change failed');
-    } finally {
-      setBusyId(null);
-    }
-  };
-
   const selectedDivision = divisions.find((d) => String(d.id) === divisionId);
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Orders</h1>
+        <Link href="/admin/orders/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+          Create order
+        </Link>
       </div>
 
       <div className="mb-4 rounded-xl border border-border bg-card p-4">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filters</div>
         <div className="flex flex-wrap gap-2">
+          <input placeholder="Order #" className="w-40 rounded-md border border-input px-3 py-2 text-sm" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value)} />
           <input placeholder="Customer name" className="w-48 rounded-md border border-input px-3 py-2 text-sm" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
           <input placeholder="Mobile" className="w-40 rounded-md border border-input px-3 py-2 text-sm" value={mobile} onChange={(e) => setMobile(e.target.value)} />
           <select className="rounded-md border border-input px-3 py-2 text-sm" value={divisionId} onChange={(e) => { setDivisionId(e.target.value); setDistrictId(''); }}>
@@ -122,6 +123,7 @@ export default function OrdersPage() {
             <tr>
               <th className="px-4 py-2">Order #</th>
               <th className="px-4 py-2">Customer</th>
+              <th className="px-4 py-2">Delivery</th>
               <th className="px-4 py-2">Total</th>
               <th className="px-4 py-2">Payment method</th>
               <th className="px-4 py-2">Payment status</th>
@@ -138,22 +140,21 @@ export default function OrdersPage() {
                   {o.user?.name ?? '—'}
                   {o.user?.phone && <div className="text-xs text-muted-foreground">{o.user.phone}</div>}
                 </td>
+                <td className="px-4 py-2">
+                  {o.address ? (
+                    <>
+                      <div>{o.address.recipientName} · {o.address.phone}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {[o.address.address, o.address.district?.name, o.address.division?.name, o.address.zipCode].filter(Boolean).join(', ')}
+                      </div>
+                      <div className="text-xs capitalize text-muted-foreground">{o.deliveryType.replace('_', ' ')}</div>
+                    </>
+                  ) : '—'}
+                </td>
                 <td className="px-4 py-2">৳{o.total}</td>
                 <td className="px-4 py-2">{o.paymentMethod}</td>
                 <td className="px-4 py-2">{o.paymentStatus}</td>
-                <td className="px-4 py-2">
-                  <select
-                    className="rounded-md border border-input px-2 py-1 text-xs capitalize"
-                    value={o.status}
-                    disabled={busyId === o.id}
-                    onChange={(e) => changeStatus(o, e.target.value)}
-                  >
-                    <option value={o.status}>{o.status}</option>
-                    {ORDER_STATUSES.filter((s) => s !== o.status).map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </td>
+                <td className="px-4 py-2 capitalize">{o.status}</td>
                 <td className="px-4 py-2 text-muted-foreground">{new Date(o.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-2 text-right">
                   <Link href={`/admin/orders/${o.id}`} className="text-primary">Details</Link>
@@ -161,7 +162,7 @@ export default function OrdersPage() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">No orders match the filters.</td></tr>
+              <tr><td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">No orders match the filters.</td></tr>
             )}
           </tbody>
         </table>

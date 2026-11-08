@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Phone,
   Mail,
@@ -28,6 +28,8 @@ export function SiteHeader() {
   const { status } = useUserAuth();
   const authed = status === 'authed';
   const router = useRouter();
+  const pathname = usePathname();
+  const loginHref = `/user/login?next=${encodeURIComponent(pathname)}`;
   const [q, setQ] = useState('');
   const [mobileSearch, setMobileSearch] = useState(false);
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
@@ -47,7 +49,7 @@ export function SiteHeader() {
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const term = q.trim();
-    router.push(term ? `/search?q=${encodeURIComponent(term)}` : '/search');
+    router.push(term ? `/user/search?q=${encodeURIComponent(term)}` : '/user/search');
     setMobileSearch(false);
     setQ('');
   };
@@ -101,7 +103,7 @@ export function SiteHeader() {
             <Link href="/" className="rounded-md px-3 py-2 hover:text-primary">
               {t('Home')}
             </Link>
-            <Link href="/shop" className="rounded-md px-3 py-2 hover:text-primary">
+            <Link href="/user/shop" className="rounded-md px-3 py-2 hover:text-primary">
               {t('Shop')}
             </Link>
             <div
@@ -125,7 +127,7 @@ export function SiteHeader() {
                     <ul className="max-h-96 overflow-y-auto">
                       <li className="border-b border-border pb-1">
                         <Link
-                          href="/categories"
+                          href="/user/categories"
                           className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-primary hover:bg-muted"
                           onClick={() => setCatOpen(false)}
                         >
@@ -136,7 +138,7 @@ export function SiteHeader() {
                       {tree.map((c) => (
                         <li key={c.id}>
                           <Link
-                            href={`/shop?categoryId=${c.id}`}
+                            href={`/user/shop?categoryId=${c.id}`}
                             className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
                             onClick={() => setCatOpen(false)}
                           >
@@ -150,7 +152,7 @@ export function SiteHeader() {
                               {c.childrenNodes.map((child) => (
                                 <li key={child.id}>
                                   <Link
-                                    href={`/shop?categoryId=${child.id}`}
+                                    href={`/user/shop?categoryId=${child.id}`}
                                     className="block rounded-md px-3 py-1.5 text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground"
                                     onClick={() => setCatOpen(false)}
                                   >
@@ -199,7 +201,7 @@ export function SiteHeader() {
               <Search size={20} />
             </button>
             <Link
-              href={authed ? '/user/dashboard' : '/user/login'}
+              href={authed ? '/user/dashboard' : loginHref}
               aria-label={t('Account')}
               className="hidden rounded-full p-2.5 text-nav-foreground transition hover:bg-muted sm:flex"
             >
@@ -219,7 +221,7 @@ export function SiteHeader() {
             </button>
             <span className="hidden h-8 w-px bg-border md:block" />
             <Link
-              href={authed ? '/user/dashboard' : '/user/login'}
+              href={authed ? '/user/dashboard' : loginHref}
               className="hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 md:block"
             >
               {authed ? t('Account') : t('Sign in')}

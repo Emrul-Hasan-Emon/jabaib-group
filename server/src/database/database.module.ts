@@ -18,6 +18,7 @@ import { DatabaseService } from './database.service';
           username: config.getOrThrow<string>('DB_USERNAME'),
           password: config.getOrThrow<string>('DB_PASSWORD'),
           database: config.getOrThrow<string>('DB_DATABASE'),
+          ssl: config.get<string>('DB_SSL') === 'true',
         }),
     }),
     TypeOrmModule.forFeature([...ENTITIES]),

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { mediaUrl } from '@/lib/media-url';
 
 interface AdminRow {
   id: number;
@@ -88,7 +89,7 @@ export default function AdminUsersPage() {
                   <span className="flex items-center gap-3">
                     {a.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.imageUrl} alt={a.name} className="h-8 w-8 rounded-full object-cover" />
+                      <img src={mediaUrl(a.imageUrl)} alt={a.name} className="h-8 w-8 rounded-full object-cover" />
                     ) : (
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
                         {a.name.slice(0, 1).toUpperCase()}

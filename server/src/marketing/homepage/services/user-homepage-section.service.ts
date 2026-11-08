@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { DatabaseService } from '../../../database/database.service';
 import { HomepageSection } from '../../../database/entities/homepage-section.entity';
-import { productToSummary } from '../../../catalog/user/utils/product-summary';
+import { productToSummary } from '../../../catalog/product/utils/product-summary';
 
 /**
  * Storefront homepage sections. Each section's admin-configured `content`

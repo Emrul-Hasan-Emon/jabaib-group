@@ -14,6 +14,15 @@ interface AttributeValue {
   isActive?: boolean;
 }
 
+interface AttributeResponse {
+  name: string;
+  nameBN?: string | null;
+  description?: string | null;
+  descriptionBN?: string | null;
+  isActive: boolean;
+  values?: AttributeValue[];
+}
+
 export function AttributeForm({ attributeId }: { attributeId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
@@ -37,7 +46,7 @@ export function AttributeForm({ attributeId }: { attributeId?: number }) {
 
   useEffect(() => {
     if (attributeId) {
-      api.get<Record<string, any>>(`/v1/admin/attribute/${attributeId}`).then((a) => {
+      api.get<AttributeResponse>(`/v1/admin/attribute/${attributeId}`).then((a) => {
         setName(a.name);
         setNameBN(a.nameBN ?? '');
         setDescription(a.description ?? '');

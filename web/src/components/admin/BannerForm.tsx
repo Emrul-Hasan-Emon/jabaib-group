@@ -8,6 +8,21 @@ import { ImageUploadField } from '@/components/admin/ImageUploadField';
 
 const POSITIONS = ['hero', 'side', 'popup'];
 
+interface BannerResponse {
+  title: string;
+  titleBN?: string | null;
+  imageUrl?: string | null;
+  imagePath?: string | null;
+  mobileImageUrl?: string | null;
+  mobileImagePath?: string | null;
+  linkUrl?: string | null;
+  position?: string;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  sortOrder?: number;
+  isActive: boolean;
+}
+
 export function BannerForm({ bannerId }: { bannerId?: number }) {
   const { api } = useAdminAuth();
   const router = useRouter();
@@ -29,7 +44,7 @@ export function BannerForm({ bannerId }: { bannerId?: number }) {
 
   useEffect(() => {
     if (bannerId) {
-      api.get<Record<string, any>>(`/v1/admin/banner/${bannerId}`).then((b) => {
+      api.get<BannerResponse>(`/v1/admin/banner/${bannerId}`).then((b) => {
         setTitle(b.title);
         setTitleBN(b.titleBN ?? '');
         setImageUrl(b.imageUrl ?? '');

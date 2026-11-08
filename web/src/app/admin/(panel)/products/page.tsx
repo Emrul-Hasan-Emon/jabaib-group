@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAdminAuth } from '@/lib/admin-auth';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
-import { DetailsModal } from '@/components/admin/DetailsModal';
 import { flattenCategoryTree, type CategoryTree } from '@/lib/category-tree';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Product {
   id: number;
@@ -25,7 +25,6 @@ interface Option { id: number; name: string }
 export default function ProductsPage() {
   const { api } = useAdminAuth();
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [detailsTarget, setDetailsTarget] = useState<Product | null>(null);
   const [rows, setRows] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<Option[]>([]);
@@ -136,7 +135,7 @@ export default function ProductsPage() {
               <tr key={p.id} className="border-t border-border">
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-3">
-                    {p.thumbnailUrl && <img src={p.thumbnailUrl} alt="" className="h-10 w-10 rounded-md border border-border object-cover" />}
+                    {p.thumbnailUrl && <img src={mediaUrl(p.thumbnailUrl)} alt="" className="h-10 w-10 rounded-md border border-border object-cover" />}
                     <span className="font-medium">{p.name}</span>
                   </div>
                 </td>
@@ -145,10 +144,8 @@ export default function ProductsPage() {
                 <td className="px-4 py-2">{p.isFeatured ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2">{p.isActive ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-right">
-                  <button onClick={() => setDetailsTarget(p)} className="mr-3 text-muted-foreground">Details</button>
-                  <Link href={`/admin/products/${p.id}`} className="mr-3 text-primary">View</Link>
-                  <Link href={`/admin/products/${p.id}/edit`} className="mr-3 text-primary">Edit</Link>
-                  <button onClick={() => setDeleteTarget(p)} className="text-red-600">Delete</button>
+                  <Link href={`/admin/products/${p.id}`} className="mr-3 text-primary">Details</Link>
+                  <Link href={`/admin/products/${p.id}/edit`} className="text-primary">Edit</Link>
                 </td>
               </tr>
             ))}
@@ -165,21 +162,6 @@ export default function ProductsPage() {
         <button onClick={() => setPage(page + 1)} className="rounded-md border border-border px-3 py-1">Next</button>
       </div>
 
-      <DetailsModal
-        open={detailsTarget !== null}
-        title={detailsTarget?.name ?? ''}
-        onClose={() => setDetailsTarget(null)}
-        rows={detailsTarget ? [
-          { label: 'Name', value: detailsTarget.name },
-          { label: 'Slug', value: detailsTarget.slug },
-          { label: 'Category', value: detailsTarget.category?.name },
-          { label: 'Collection', value: detailsTarget.collection?.name },
-          { label: 'Featured', value: detailsTarget.isFeatured ? 'Yes' : 'No' },
-          { label: 'Published', value: detailsTarget.isPublished ? 'Yes' : 'No' },
-          { label: 'Active', value: detailsTarget.isActive ? 'Yes' : 'No' },
-          { label: 'Thumbnail', value: detailsTarget.thumbnailUrl },
-        ] : []}
-      />
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Delete product"

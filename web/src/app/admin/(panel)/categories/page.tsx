@@ -6,6 +6,7 @@ import { useAdminAuth } from '@/lib/admin-auth';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { DetailsModal } from '@/components/admin/DetailsModal';
 import { flattenCategoryTree, type CategoryTree, type FlatCategory } from '@/lib/category-tree';
+import { mediaUrl } from '@/lib/media-url';
 
 interface Category {
   id: number;
@@ -19,6 +20,12 @@ interface Category {
   sortOrder: number;
   isActive: boolean;
   parent?: Category | null;
+}
+
+interface ParentChainNode {
+  id: number;
+  name: string;
+  nameBN: string | null;
 }
 
 export default function CategoriesPage() {
@@ -43,7 +50,18 @@ export default function CategoriesPage() {
     if (parentId) params.set('parentId', parentId);
     const res = await api.get<{ data: Category[] }>(`/v1/admin/category?${params}`);
     setRows(res.data);
+    if (res.data.length > 0) {
+      const chains = await api.post<Record<string, ParentChainNode[]>>(
+        '/v1/admin/category/parent-chains',
+        { ids: res.data.map((c) => c.id) },
+      );
+      setParentChains(chains);
+    } else {
+      setParentChains({});
+    }
   }, [api, q, isActive, parentId]);
+
+  const [parentChains, setParentChains] = useState<Record<string, ParentChainNode[]>>({});
 
   useEffect(() => {
     load().catch((e) => setError(e.message));
@@ -95,6 +113,7 @@ export default function CategoriesPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted text-left">
             <tr>
+              <th className="px-4 py-2">Image</th>
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Slug</th>
               <th className="px-4 py-2">Parent</th>
@@ -104,22 +123,36 @@ export default function CategoriesPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((c) => (
+            {rows.map((c) => {
+              const chain = parentChains[c.id] ?? [];
+              const ancestors = chain.slice(0, -1);
+              return (
               <tr key={c.id} className="border-t border-border">
+                <td className="px-4 py-2">
+                  {c.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mediaUrl(c.imageUrl)} alt={c.name} className="h-10 w-10 rounded-md border border-border object-cover" />
+                  ) : (
+                    <span className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-2 font-medium">{c.name}{c.nameBN ? ` · ${c.nameBN}` : ''}</td>
                 <td className="px-4 py-2 text-muted-foreground">{c.slug}</td>
-                <td className="px-4 py-2">{c.parent?.name ?? '—'}</td>
+                <td className="px-4 py-2 text-muted-foreground">
+                  {ancestors.length > 0 ? ancestors.map((a) => a.name).join(' → ') + ' → ' : ''}
+                  <span className="text-foreground">{c.name}</span>
+                </td>
                 <td className="px-4 py-2">{c.sortOrder}</td>
                 <td className="px-4 py-2">{c.isActive ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-right">
                   <button onClick={() => setDetailsTarget(c)} className="mr-3 text-muted-foreground">Details</button>
-                  <Link href={`/admin/categories/${c.id}`} className="mr-3 text-primary">Edit</Link>
-                  <button onClick={() => setDeleteTarget(c)} className="text-red-600">Delete</button>
+                  <Link href={`/admin/categories/${c.id}`} className="text-primary">Edit</Link>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {rows.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No categories yet.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No categories yet.</td></tr>
             )}
           </tbody>
         </table>

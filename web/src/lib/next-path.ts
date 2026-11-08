@@ -1,5 +1,5 @@
-/** Post-login destination (`?next=/checkout`) — same-origin paths only. */
-export function nextPath(fallback = '/user/dashboard'): string {
+/** Post-login destination (`?next=/user/checkout`) — same-origin paths only. */
+export function nextPath(fallback = '/'): string {
   if (typeof window === 'undefined') return fallback;
   const raw = new URLSearchParams(window.location.search).get('next');
   if (!raw) return fallback;

@@ -117,6 +117,68 @@
       "name": "Orders",
       "item": [
         {
+          "name": "Create (admin-placed, defaults to Cash on Delivery gateway)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 5,\n  \"items\": [\n    {\n      \"productId\": 20,\n      \"productSKUId\": 20,\n      \"quantity\": 1\n    }\n  ],\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"deliveryType\": \"inside_dhaka\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create (admin-placed, explicit payment gateway)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/v1/admin/order",
+              "host": [
+                "http://localhost:3000"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 5,\n  \"items\": [\n    {\n      \"productId\": 20,\n      \"productSKUId\": 20,\n      \"quantity\": 1\n    }\n  ],\n  \"recipientName\": \"Rafi Ahmed\",\n  \"phone\": \"01712345678\",\n  \"address\": \"House 12, Road 5, Dhanmondi\",\n  \"deliveryType\": \"inside_dhaka\",\n  \"paymentGatewayId\": 2,\n  \"paymentMetaData\": {\n    \"txnId\": \"TXN123456\"\n  }\n}"
+            }
+          }
+        },
+        {
           "name": "List (filters: status, paymentStatus, paymentMethod, q, customerName, mobile, divisionId, districtId, date range)",
           "request": {
             "method": "GET",
