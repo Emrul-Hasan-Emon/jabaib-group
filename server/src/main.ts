@@ -29,12 +29,15 @@ async function bootstrap() {
 
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
-  const uploadDir =
-    app.get(ConfigService).get<string>('LOCAL_UPLOAD_DIR') ?? './uploads';
-  const uploadRoot = path.isAbsolute(uploadDir)
-    ? uploadDir
-    : path.resolve(process.cwd(), uploadDir);
-  app.useStaticAssets(uploadRoot, { index: false, fallthrough: true });
+  // Local disk uploads are served from this app; S3 uploads are served
+  // directly from the bucket's own public URL (set in FileHandleService).
+  if (config.get<string>('STORAGE_DRIVER') !== 's3') {
+    const uploadDir = config.get<string>('LOCAL_UPLOAD_DIR') ?? './uploads';
+    const uploadRoot = path.isAbsolute(uploadDir)
+      ? uploadDir
+      : path.resolve(process.cwd(), uploadDir);
+    app.useStaticAssets(uploadRoot, { index: false, fallthrough: true });
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({
